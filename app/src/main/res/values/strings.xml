@@ -44,4 +44,5 @@
         <item>汽车</item>
         <item>社会</item>
     </array>
+    <string name="title_activity_favorite">FavoriteActivity</string>
 </resources>

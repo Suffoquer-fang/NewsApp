@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+
+<com.mcxtzhang.swipemenulib.SwipeMenuLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:paddingBottom="1dp"
+    style="@style/MyTheme"
+    android:background="@color/background_material_light">
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
+    android:id="@+id/content_fav"
     >
     <LinearLayout
         android:layout_width="300dp"
@@ -60,3 +72,13 @@
 
     </RelativeLayout>
 </LinearLayout>
+
+    <Button
+        android:id="@+id/btnDelete"
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        android:background="@color/red_500"
+        android:text="删除"
+        android:textColor="@android:color/white"/>
+
+</com.mcxtzhang.swipemenulib.SwipeMenuLayout>

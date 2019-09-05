@@ -212,7 +212,11 @@ public class NewsListFragment extends BaseLazyLoadFragment
     {
         itemClickListener = new NewsItemRecyclerViewAdapter.ItemClickListener() {
             @Override
-            public void onItemClick(int position) {
+            public void onItemClick(int position, boolean isDel) {
+
+                getNewsHelper.addHistory(newsItemList.get(position));
+
+
                 Toast.makeText(getContext(), newsItemList.get(position).getmTitle(), Toast.LENGTH_SHORT).show();
                 String title = newsItemList.get(position).getmTitle();
                 String content = newsItemList.get(position).getmContent();

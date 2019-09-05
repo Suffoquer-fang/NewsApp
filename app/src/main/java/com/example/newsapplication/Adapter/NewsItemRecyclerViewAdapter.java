@@ -1,16 +1,17 @@
 package com.example.newsapplication.Adapter;
 
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.example.newsapplication.R;
 import com.example.newsapplication.dummy.NewsItem;
+import com.mcxtzhang.swipemenulib.SwipeMenuLayout;
 
 import java.util.List;
 
@@ -19,8 +20,18 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
     private final List<NewsItem> mNewsList;
     private final ItemClickListener mListener;
 
+    public boolean isSwipe() {
+        return isSwipe;
+    }
+
+    public void setSwipe(boolean swipe) {
+        isSwipe = swipe;
+    }
+
+    private boolean isSwipe = false;
+
     public interface ItemClickListener{
-        public void onItemClick(int position);
+        void onItemClick(int position, boolean isDel);
     }
 
     public NewsItemRecyclerViewAdapter(List<NewsItem> items, ItemClickListener listener) {
@@ -30,7 +41,6 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
 
     @Override
     public int getItemViewType(int position) {
-
         return mNewsList.get(position).getmType();
     }
 
@@ -58,13 +68,27 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
         holder.mItem = mNewsList.get(position);
         //System.out.println("bind");
         holder.updateView();
-        holder.mView.setOnClickListener(new View.OnClickListener() {
+
+
+        ((SwipeMenuLayout)holder.mView).setSwipeEnable(isSwipe);
+
+        if(isSwipe)
+        {
+            holder.mView.findViewById(R.id.btnDelete).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mListener.onItemClick(position, true);
+                }
+            });
+        }
+
+        holder.mView.findViewById(R.id.content_fav).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onItemClick(position);
+                    mListener.onItemClick(position, false);
                 }
             }
         });
@@ -151,6 +175,9 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
             Glide.with(mView).load(mItem.getmImages().get(2)).into(mImgView_3);
         }
     }
+
+
+
 
 
 }

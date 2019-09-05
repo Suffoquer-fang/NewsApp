@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activity.FavoriteActivity"
+    style="@style/MyTheme"
+    android:background="@color/background_material_light">
+
+
+    <cn.bingoogolapple.refreshlayout.BGARefreshLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/BGARefreshLayout">
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/fav_recyclerView"
+        tools:listitem="@layout/item_type_0"
+        tools:itemCount="10">
+
+
+
+    </androidx.recyclerview.widget.RecyclerView>
+    </cn.bingoogolapple.refreshlayout.BGARefreshLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

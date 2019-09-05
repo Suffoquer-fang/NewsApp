@@ -1,5 +1,6 @@
 package com.example.newsapplication.Activity;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -51,6 +52,7 @@ public class SearchActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     public void initView()
     {
 

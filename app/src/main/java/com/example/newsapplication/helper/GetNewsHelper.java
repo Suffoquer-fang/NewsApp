@@ -97,11 +97,12 @@ public class GetNewsHelper {
 
         } else if (type == HISTORY)            //history
         {
-            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId"}, "channel = ? and pubtime > ? and pubtime < ? and isHis = 1", new String[]{channel, startDate, endDate}, null, null, "pubtime DESC");
+            System.out.println("q history");
+            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId"}, "isHis = 1", null, null, null, "pubtime DESC");
 
         } else if(type == FAVORITE)                       //Fav
         {
-            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId"}, "channel = ? and pubtime > ? and pubtime < ? and isFav = 1", new String[]{channel, startDate, endDate}, null, null, "pubtime DESC");
+            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId"}, "isFav = 1", null, null, null, "pubtime DESC");
         }
         System.out.println("get from db");
 
@@ -132,17 +133,16 @@ public class GetNewsHelper {
             public void onFailure(Call call, IOException e) {
 
                 System.out.println("Net failed");
-                List<NewsItem> ret = getNewsFromDB(size, channel, startDate, endDate, keyword, NORMAL);
-                listener.onGetNewsSuccessful(ret, loadmore);
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-////                        SQLiteDatabase db = DBhelper.getReadableDatabase();
-////                        List<NewsItem> ret = new ArrayList<>();
-//                        List<NewsItem> ret = getNewsFromDB(size, channel, startDate, endDate, keyword, NORMAL);
-//                        listener.onGetNewsSuccessful(ret, loadmore);
-//                    }
-//                }).start();
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+//                        SQLiteDatabase db = DBhelper.getReadableDatabase();
+//                        List<NewsItem> ret = new ArrayList<>();
+                        List<NewsItem> ret = getNewsFromDB(size, channel, startDate, endDate, keyword, NORMAL);
+                        listener.onGetNewsSuccessful(ret, loadmore);
+                    }
+                }).start();
             }
 
             @Override
@@ -257,6 +257,9 @@ public class GetNewsHelper {
     }
 
     public boolean addNormal(NewsItem item) {
+
+        Cursor c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "NewsId"}, "NewsId = ?", new String[]{item.getmNewsID()}, null, null, null);
+        if(c.moveToFirst()) return false;
         System.out.println("add normal");
         ContentValues cv = new ContentValues();
         cv.put("title", item.getmTitle());

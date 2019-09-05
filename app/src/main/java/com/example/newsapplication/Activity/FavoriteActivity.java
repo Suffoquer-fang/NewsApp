@@ -1,14 +1,9 @@
 package com.example.newsapplication.Activity;
 
 import android.annotation.SuppressLint;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.SearchView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,52 +20,41 @@ import com.example.newsapplication.helper.GetNewsListener;
 import com.github.nukc.stateview.StateView;
 import com.r0adkll.slidr.Slidr;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import cn.bingoogolapple.refreshlayout.BGANormalRefreshViewHolder;
 import cn.bingoogolapple.refreshlayout.BGARefreshLayout;
 import cn.bingoogolapple.refreshlayout.BGARefreshViewHolder;
 
-public class SearchResultActivity extends AppCompatActivity
+public class FavoriteActivity extends AppCompatActivity
         implements BGARefreshLayout.BGARefreshLayoutDelegate, GetNewsListener {
-
 
     private RecyclerView recyclerView = null;
     private NewsItemRecyclerViewAdapter adapter;
     private NewsItemRecyclerViewAdapter.ItemClickListener itemClickListener;
-
     private List<NewsItem> newsItemList = new ArrayList<>();
-    private BGARefreshLayout bgaRefreshLayout;
-    private StateView stateView;
 
+    private StateView stateView;
+    private BGARefreshLayout bgaRefreshLayout;
     private GetNewsHelper getNewsHelper = new GetNewsHelper(this);
 
     private Slidr slidr;
 
-    private TextView Cancel;
-    private SearchView searchView;
-
-    private String searchKeyword;
 
     private int lastPosition = 0;
     private int lastOffset = 0;
 
-    private boolean isReadyForSearch = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search_result);
-        getNewsHelper.setSearchResultListener(this);
-
+        setContentView(R.layout.activity_favorite);
+        getNewsHelper.setFavoriteListener(this);
+        getNewsHelper.setHistoryListener(this);
         slidr = new Slidr();
         slidr.attach(this);
 
-        Bundle bundle = getIntent().getExtras();
-        searchKeyword = bundle.getString("SearchKey");
 
         initView();
     }
@@ -79,10 +63,9 @@ public class SearchResultActivity extends AppCompatActivity
     {
         initListener();
 
-        recyclerView = findViewById(R.id.search_result_recyclerView);
+        recyclerView = findViewById(R.id.fav_recyclerView);
         adapter = new NewsItemRecyclerViewAdapter(newsItemList, itemClickListener);
-        Cancel = findViewById(R.id.textView);
-        searchView = findViewById(R.id.search);
+        adapter.setSwipe(true);
 
         bgaRefreshLayout = findViewById(R.id.BGARefreshLayout);
         stateView = StateView.inject(this);
@@ -93,6 +76,8 @@ public class SearchResultActivity extends AppCompatActivity
 
         initRecyclerView();
         initSwipe();
+
+        requestNewsData();
     }
 
 
@@ -122,56 +107,6 @@ public class SearchResultActivity extends AppCompatActivity
         }
 
 
-        Cancel.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                switch (motionEvent.getAction()) {
-                    case MotionEvent.ACTION_DOWN: {
-                        Cancel.setTextColor(getApplicationContext().getResources().getColor(R.color.SlightBlue));
-                        break;
-                    }
-                    case MotionEvent.ACTION_UP: {
-
-                        Cancel.setTextColor(getApplicationContext().getResources().getColor(R.color.DeepBlue));
-                        finish();
-                        break;
-                    }
-                }
-                return false;
-            }
-        });
-
-
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                //TODO Query
-
-                ContentValues cv = new ContentValues();
-                SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
-                cv.put("Time", ft.format(new Date()));
-                cv.put("Content", searchView.getQuery().toString());
-                getNewsHelper.getDBhelper().insertHis(cv);
-                Log.d("insert", searchView.getQuery().toString());
-
-                searchKeyword = s;
-                if(isReadyForSearch)
-                    updateSearchResult();
-
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                return false;
-            }
-        });
-
-
-        searchView.setQuery(searchKeyword, false);
-        updateSearchResult();
-
     }
 
     private void getPositionAndOffset()
@@ -198,24 +133,19 @@ public class SearchResultActivity extends AppCompatActivity
         itemClickListener = new NewsItemRecyclerViewAdapter.ItemClickListener() {
             @Override
             public void onItemClick(int position, boolean isDel) {
-                clickItem(position);
+                if(!isDel)
+                    clickItem(position);
+                else
+                    deleteItem(position);
             }
         };
     }
 
-    public void updateSearchResult()
-    {
-        searchKeyword = "清华大学";
-        newsItemList.clear();
-        adapter.notifyDataSetChanged();
-        stateView.showLoading();
-        requestNewsData();
-    }
 
 
     public void requestNewsData()
     {
-        getNewsHelper.requestSearchResult(30, searchKeyword);
+        getNewsHelper.requestHistory(10, false);
     }
 
 
@@ -260,7 +190,6 @@ public class SearchResultActivity extends AppCompatActivity
         }
 
 
-        isReadyForSearch = true;
 
     }
 
@@ -268,14 +197,12 @@ public class SearchResultActivity extends AppCompatActivity
     public void onGetNewsFailed(int failed_id) {
 
         stateView.showContent();
-        //
-        isReadyForSearch = true;
+
     }
-
-
 
     public void clickItem(int position)
     {
+
         Toast.makeText(this, newsItemList.get(position).getmTitle(), Toast.LENGTH_SHORT).show();
         String title = newsItemList.get(position).getmTitle();
         String content = newsItemList.get(position).getmContent();
@@ -297,4 +224,13 @@ public class SearchResultActivity extends AppCompatActivity
         startActivity(intent);
     }
 
+
+    public void deleteItem(int position)
+    {
+        NewsItem tmp = newsItemList.remove(position);
+        adapter.notifyItemRemoved(position);
+        adapter.notifyItemRangeChanged(position, newsItemList.size() - position);//通知重新绑定某一范围内的的数据与界面
+
+        getNewsHelper.deleteFavorite(tmp);
+    }
 }
