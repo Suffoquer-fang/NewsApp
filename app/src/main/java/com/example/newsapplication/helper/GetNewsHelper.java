@@ -40,7 +40,7 @@ public class GetNewsHelper {
     //private UrlHelper urlHelper;
 
 
-    private static int NORMAL = 0;
+    private static int NORMAL = 50;
     private static int HISTORY = 1;
     private static int FAVORITE = 2;
 
