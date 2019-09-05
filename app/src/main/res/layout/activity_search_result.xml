@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_material_light"
+    tools:context=".Activity.SearchResultActivity"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:orientation="horizontal">
+
+        <SearchView
+            android:id="@+id/search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:iconifiedByDefault="false"
+            android:queryHint="点击此处搜索"
+            android:layout_weight="0.3">
+
+        </SearchView>
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:gravity="center"
+            android:text="取消"
+            android:textColor="@color/DeepBlue"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+
+
+    <cn.bingoogolapple.refreshlayout.BGARefreshLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/BGARefreshLayout">
+
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="20dp"
+            android:id="@+id/search_result_recyclerView"
+            app:layoutManager="LinearLayoutManager"
+            tools:context=".Activity.SearchResultActivity">
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+
+    </cn.bingoogolapple.refreshlayout.BGARefreshLayout>
+
+
+
+</LinearLayout>
