@@ -1,5 +1,6 @@
 package com.example.newsapplication.Adapter;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,7 +71,7 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
         holder.updateView();
 
 
-        ((SwipeMenuLayout)holder.mView).setSwipeEnable(isSwipe);
+        ((SwipeMenuLayout)holder.mView.findViewById(R.id.swipeMenuLayout)).setSwipeEnable(isSwipe);
 
         if(isSwipe)
         {
@@ -125,10 +126,17 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
     public class NoPhotoViewHolder extends ViewHolder
     {
         public NoPhotoViewHolder(View view) {super(view);}
+        @SuppressLint("ResourceAsColor")
         public void updateView() {
             mAuthorView.setText(mItem.getmAuthor());
             mTitleView.setText(mItem.getmTitle());
             mPubTimeView.setText(mItem.getmPubTime());
+
+
+            if(!mItem.isInHistory())
+                mTitleView.setTextColor(mView.getResources().getColor(R.color.black));
+            else
+                mTitleView.setTextColor(mView.getResources().getColor(R.color.gray));
 
         }
     }
@@ -141,8 +149,15 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
             super(view);
             mImgView = (ImageView)view.findViewById(R.id.image_type_1);
         }
+        @SuppressLint("ResourceAsColor")
         public void updateView()
         {
+
+            if(!mItem.isInHistory())
+                mTitleView.setTextColor(mView.getResources().getColor(R.color.black));
+            else
+                mTitleView.setTextColor(mView.getResources().getColor(R.color.gray));
+
             mAuthorView.setText(mItem.getmAuthor());
             mTitleView.setText(mItem.getmTitle());
             mPubTimeView.setText(mItem.getmPubTime());
@@ -161,8 +176,17 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
             mImgView_2 = (ImageView)view.findViewById(R.id.second_image_type_2);
             mImgView_3 = (ImageView)view.findViewById(R.id.third_image_type_2);
         }
+        @SuppressLint("ResourceAsColor")
         public void updateView()
         {
+
+
+            if(!mItem.isInHistory())
+                mTitleView.setTextColor(mView.getResources().getColor(R.color.black));
+            else
+                mTitleView.setTextColor(mView.getResources().getColor(R.color.gray));
+
+
             mTitleView.setText(mItem.getmTitle());
             mPubTimeView.setText(mItem.getmPubTime());
             mAuthorView.setText(mItem.getmAuthor());

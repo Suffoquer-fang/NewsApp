@@ -57,5 +57,7 @@ dependencies {
     implementation 'cn.bingoogolapple:bga-refreshlayout:1.1.8'
     implementation 'com.r0adkll:slidableactivity:2.1.0'
     implementation 'com.github.mcxtzhang:SwipeDelMenuLayout:V1.3.0'
+    implementation 'com.lin:timeline:1.1@aar'
+    implementation 'cn.jzvd:jiaozivideoplayer:7.0.5'
 
 }

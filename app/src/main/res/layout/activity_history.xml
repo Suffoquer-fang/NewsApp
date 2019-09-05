@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activity.FavoriteActivity"
+    tools:context=".Activity.HistoryActivity"
     style="@style/MyTheme"
     android:background="@color/background_material_light"
     android:orientation="vertical">
@@ -16,22 +16,23 @@
         android:layout_marginBottom="10dp"
         android:textAlignment="center"
         android:textSize="18pt"
-        android:text="新闻收藏"/>
+        android:text="新闻历史"/>
 
     <cn.bingoogolapple.refreshlayout.BGARefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/BGARefreshLayout">
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/fav_recyclerView"
-        tools:listitem="@layout/item_type_0"
-        tools:itemCount="10">
+        android:id="@+id/BGARefreshLayout"
+        >
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/his_recyclerView"
+            android:layout_marginStart="20dp"
+            android:paddingStart="30dp">
 
 
 
-    </androidx.recyclerview.widget.RecyclerView>
+        </androidx.recyclerview.widget.RecyclerView>
     </cn.bingoogolapple.refreshlayout.BGARefreshLayout>
 
 </LinearLayout>

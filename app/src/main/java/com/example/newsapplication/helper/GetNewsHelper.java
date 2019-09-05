@@ -239,6 +239,7 @@ public class GetNewsHelper {
 
 
     public boolean deleteHistory(NewsItem del) {
+        del.setInHistory(false);
         ContentValues cv = new ContentValues();
         cv.put("isHis", 0);
         DBhelper.getReadableDatabase().update("News", cv, "NewsId = ?", new String[]{del.getmNewsID()});
@@ -278,6 +279,7 @@ public class GetNewsHelper {
     }
 
     public boolean addHistory(NewsItem item) {
+        item.setInHistory(true);
         ContentValues cv = new ContentValues();
         cv.put("isHis", 1);
         int ret = DBhelper.getReadableDatabase().update("News", cv, "NewsId = ?", new String[]{item.getmNewsID()});
@@ -296,22 +298,27 @@ public class GetNewsHelper {
     }
 
     public boolean isInHistory(String newsID) {
-        return false;
-//        if(newsID == null) return false;
-//        SQLiteDatabase db = DBhelper.getReadableDatabase();
-//        Cursor c = db.query("News", new String[]{"_id", "isHis"}, "NewsId = ?", new String[]{newsID}, null, null, null);
-//        //db.close();
-//        c.moveToFirst();
-//        if (c.getInt(c.getColumnIndex("isHis")) == 1)
-//            return true;
-//        else
-//            return false;
+        //return false;
+        if(newsID == null) return false;
+
+        Cursor c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "isHis"}, "NewsId = ?", new String[]{newsID}, null, null, null);
+        if(!c.moveToFirst()) return false;
+        if (c.getInt(c.getColumnIndex("isHis")) == 1){
+            c.close();
+            DBhelper.close();
+            return true;
+        }
+        else {
+            c.close();
+            DBhelper.close();
+            return false;
+        }
     }
 
     public boolean isInFavorite(String newsID) {
         Cursor c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "isFav"}, "NewsId = ?", new String[]{newsID}, null, null, null);
         //db.close();
-        c.moveToFirst();
+        if(!c.moveToFirst()) return false;
         if (c.getInt(c.getColumnIndex("isFav")) == 1) {
             c.close();
             DBhelper.close();

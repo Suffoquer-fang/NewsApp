@@ -10,7 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="456dp"
         android:layout_gravity="center"
-        android:layout_weight="1"
         android:background="@color/background_material_light"
         android:orientation="vertical">
 
@@ -68,9 +67,11 @@
 
 
     <ImageView
-        android:layout_weight="1"
+        android:id="@+id/share"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/close_ori"/>
+        android:layout_weight="1"
+        android:scaleType="fitXY"
+        android:src="@drawable/search_background_1" />
 
 </LinearLayout>

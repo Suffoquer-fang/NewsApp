@@ -1,14 +1,17 @@
 package com.example.newsapplication.Fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
+import androidx.fragment.app.Fragment;
+
+import com.example.newsapplication.Activity.FavoriteActivity;
+import com.example.newsapplication.Activity.HistoryActivity;
 import com.example.newsapplication.R;
 
 public class Fragment_Info extends Fragment {
@@ -58,6 +61,30 @@ public class Fragment_Info extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_fragment__info, container, false);
+
+
+        ImageButton favBtn = view.findViewById(R.id.favBtn);
+        ImageButton hisBtn = view.findViewById(R.id.historyBtn);
+
+        favBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getActivity(), FavoriteActivity.class));
+            }
+        });
+
+
+        hisBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getActivity(), HistoryActivity.class));
+            }
+        });
+
+
+
+
+
 
         return view;
     }

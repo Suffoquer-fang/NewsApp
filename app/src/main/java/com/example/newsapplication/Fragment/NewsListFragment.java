@@ -215,7 +215,7 @@ public class NewsListFragment extends BaseLazyLoadFragment
             public void onItemClick(int position, boolean isDel) {
 
                 getNewsHelper.addHistory(newsItemList.get(position));
-
+                adapter.notifyItemChanged(position);
 
                 Toast.makeText(getContext(), newsItemList.get(position).getmTitle(), Toast.LENGTH_SHORT).show();
                 String title = newsItemList.get(position).getmTitle();
