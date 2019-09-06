@@ -6,12 +6,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 
 import androidx.fragment.app.Fragment;
 
 import com.example.newsapplication.Activity.FavoriteActivity;
 import com.example.newsapplication.Activity.HistoryActivity;
+import com.example.newsapplication.Activity.SettingsActivity;
 import com.example.newsapplication.R;
 
 public class Fragment_Info extends Fragment {
@@ -78,6 +80,17 @@ public class Fragment_Info extends Fragment {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(getActivity(), HistoryActivity.class));
+            }
+        });
+
+        Button btn = view.findViewById(R.id.button);
+        btn.setText("设置");
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+
             }
         });
 

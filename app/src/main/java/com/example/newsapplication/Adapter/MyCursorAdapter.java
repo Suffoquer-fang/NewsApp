@@ -18,12 +18,14 @@ public class MyCursorAdapter extends CursorAdapter {
 
     private final LayoutInflater mInflater;
     private final MyDBOpenHelper helper;
+    private View.OnClickListener listener;
 
-    public MyCursorAdapter(Context context, Cursor cursor, MyDBOpenHelper helper) {
+    public MyCursorAdapter(Context context, Cursor cursor, MyDBOpenHelper helper, View.OnClickListener listener) {
         super(context, cursor, 0);
 
         mInflater = LayoutInflater.from(context);
         this.helper = helper;
+        this.listener = listener;
     }
 
     @Override
@@ -40,7 +42,7 @@ public class MyCursorAdapter extends CursorAdapter {
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("Shit", "Clicked his");
+                listener.onClick(view);
             }
         });
         iv.setOnClickListener(new View.OnClickListener() {

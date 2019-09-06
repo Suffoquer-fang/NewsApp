@@ -5,10 +5,13 @@
     android:layout_height="match_parent"
     tools:context=".Fragment.Fragment_Video">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="200dp">
+        <org.salient.artplayer.VideoView
+            android:id="@+id/video_view"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"/>
+    </LinearLayout>
 
 </FrameLayout>

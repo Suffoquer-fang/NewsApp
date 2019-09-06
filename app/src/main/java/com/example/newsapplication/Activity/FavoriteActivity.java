@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.example.newsapplication.Adapter.NewsItemRecyclerViewAdapter;
 import com.example.newsapplication.R;
 import com.example.newsapplication.dummy.NewsItem;
@@ -45,13 +46,14 @@ public class FavoriteActivity extends AppCompatActivity
     private int lastPosition = 0;
     private int lastOffset = 0;
 
+    boolean isLoading = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite);
         getNewsHelper.setFavoriteListener(this);
-        getNewsHelper.setHistoryListener(this);
         slidr = new Slidr();
         slidr.attach(this);
 
@@ -68,16 +70,21 @@ public class FavoriteActivity extends AppCompatActivity
         adapter.setSwipe(true);
 
         bgaRefreshLayout = findViewById(R.id.BGARefreshLayout);
-        stateView = StateView.inject(this);
+        stateView = StateView.wrap(recyclerView);
 
         stateView.setLoadingResource(R.layout.centerloading);
-        stateView.showLoading();
 
 
         initRecyclerView();
         initSwipe();
 
-        requestNewsData();
+        if(newsItemList.size() == 0) {
+
+            stateView.showLoading();
+            //requestNewsData();
+            bgaRefreshLayout.beginRefreshing();
+            isLoading = true;
+        }
     }
 
 
@@ -145,7 +152,24 @@ public class FavoriteActivity extends AppCompatActivity
 
     public void requestNewsData()
     {
-        getNewsHelper.requestHistory(10, false);
+        getNewsHelper.requestFavorite(10, false);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if(isLoading)
+                {
+                    System.out.println("still loading");
+                    requestNewsData();
+                }
+            }
+            }).start();
+
     }
 
 
@@ -162,17 +186,20 @@ public class FavoriteActivity extends AppCompatActivity
 
 
     @Override
-    public void onGetNewsSuccessful(List<NewsItem> newsList, boolean loadmore) {
+    public void onGetNewsSuccessful(final List<NewsItem> newsList, boolean loadmore) {
 
+        System.out.println("get back succ");
+
+        newsItemList.clear();
+        newsItemList.addAll(0, newsList);
         if(!loadmore) {
-            newsItemList.addAll(0, newsList);
             recyclerView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-
                     adapter.notifyDataSetChanged();
                     bgaRefreshLayout.endRefreshing();
                     stateView.showContent();
+                    isLoading = false;
                 }
             }, 500);
         }
@@ -195,8 +222,14 @@ public class FavoriteActivity extends AppCompatActivity
 
     @Override
     public void onGetNewsFailed(int failed_id) {
+        isLoading = false;
+        recyclerView.post(new Runnable() {
+            @Override
+            public void run() {
 
-        stateView.showContent();
+                stateView.showContent();
+            }
+        });
 
     }
 
@@ -233,4 +266,11 @@ public class FavoriteActivity extends AppCompatActivity
 
         getNewsHelper.deleteFavorite(tmp);
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Animatoo.animateSlideRight(this);
+    }
+
 }

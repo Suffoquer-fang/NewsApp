@@ -133,7 +133,7 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
             mPubTimeView.setText(mItem.getmPubTime());
 
 
-            if(!mItem.isInHistory())
+            if(!mItem.isInHistory() || isSwipe)
                 mTitleView.setTextColor(mView.getResources().getColor(R.color.black));
             else
                 mTitleView.setTextColor(mView.getResources().getColor(R.color.gray));
@@ -153,7 +153,7 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
         public void updateView()
         {
 
-            if(!mItem.isInHistory())
+            if(!mItem.isInHistory() || isSwipe)
                 mTitleView.setTextColor(mView.getResources().getColor(R.color.black));
             else
                 mTitleView.setTextColor(mView.getResources().getColor(R.color.gray));
@@ -179,9 +179,7 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
         @SuppressLint("ResourceAsColor")
         public void updateView()
         {
-
-
-            if(!mItem.isInHistory())
+            if(!mItem.isInHistory() || isSwipe)
                 mTitleView.setTextColor(mView.getResources().getColor(R.color.black));
             else
                 mTitleView.setTextColor(mView.getResources().getColor(R.color.gray));

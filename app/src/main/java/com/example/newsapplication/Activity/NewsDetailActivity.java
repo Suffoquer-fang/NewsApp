@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.bumptech.glide.Glide;
 import com.example.newsapplication.R;
 import com.example.newsapplication.helper.ShareUtil;
@@ -130,5 +131,11 @@ public class NewsDetailActivity extends AppCompatActivity {
 
     public void shareText() {
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Animatoo.animateSlideRight(this);
     }
 }

@@ -22,6 +22,7 @@ import com.example.newsapplication.R;
 import com.example.newsapplication.dummy.NewsItem;
 import com.example.newsapplication.helper.GetNewsHelper;
 import com.example.newsapplication.helper.GetNewsListener;
+import com.example.newsapplication.helper.TimeHelper;
 import com.github.nukc.stateview.StateView;
 import com.r0adkll.slidr.Slidr;
 
@@ -33,6 +34,7 @@ import java.util.List;
 import cn.bingoogolapple.refreshlayout.BGANormalRefreshViewHolder;
 import cn.bingoogolapple.refreshlayout.BGARefreshLayout;
 import cn.bingoogolapple.refreshlayout.BGARefreshViewHolder;
+import es.dmoral.toasty.Toasty;
 
 public class SearchResultActivity extends AppCompatActivity
         implements BGARefreshLayout.BGARefreshLayoutDelegate, GetNewsListener {
@@ -59,6 +61,11 @@ public class SearchResultActivity extends AppCompatActivity
     private int lastOffset = 0;
 
     private boolean isReadyForSearch = false;
+
+
+    private String currFirstTime = "";
+    private String currLastTime = "";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +100,8 @@ public class SearchResultActivity extends AppCompatActivity
 
         initRecyclerView();
         initSwipe();
+
+        bgaRefreshLayout.setPullDownRefreshEnable(false);
     }
 
 
@@ -190,7 +199,6 @@ public class SearchResultActivity extends AppCompatActivity
         BGARefreshViewHolder refreshViewHolder = new BGANormalRefreshViewHolder(this, true);
         // 设置下拉刷新和上拉加载更多的风格
         bgaRefreshLayout.setRefreshViewHolder(refreshViewHolder);
-        bgaRefreshLayout.setIsShowLoadingMoreView(false);
     }
 
     public void initListener()
@@ -205,7 +213,8 @@ public class SearchResultActivity extends AppCompatActivity
 
     public void updateSearchResult()
     {
-        searchKeyword = "清华大学";
+        currFirstTime = "";
+        currLastTime = "";
         newsItemList.clear();
         adapter.notifyDataSetChanged();
         stateView.showLoading();
@@ -215,7 +224,7 @@ public class SearchResultActivity extends AppCompatActivity
 
     public void requestNewsData()
     {
-        getNewsHelper.requestSearchResult(30, searchKeyword);
+        getNewsHelper.getNewsFromPureNetwork("", currFirstTime, "", searchKeyword, this, false);
     }
 
 
@@ -226,16 +235,26 @@ public class SearchResultActivity extends AppCompatActivity
 
     @Override
     public boolean onBGARefreshLayoutBeginLoadingMore(BGARefreshLayout refreshLayout) {
-        //getNewsHelper.requestSearchResult(30, "习近平");
+        getNewsHelper.getNewsFromPureNetwork("", "", currLastTime, searchKeyword, this, true);
         return true;
     }
 
 
     @Override
     public void onGetNewsSuccessful(List<NewsItem> newsList, boolean loadmore) {
-
         if(!loadmore) {
+
             newsItemList.addAll(0, newsList);
+
+            final int addSize = newsList.size();
+
+            if(newsItemList.size() > 0) {
+                currFirstTime = newsItemList.get(0).getmPubTime();
+                currFirstTime = TimeHelper.timeAfter(currFirstTime, 1);
+                currLastTime = newsItemList.get(newsItemList.size()-1).getmPubTime();
+                currLastTime = TimeHelper.timeBefore(currLastTime, 1);
+            }
+
             recyclerView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -243,15 +262,22 @@ public class SearchResultActivity extends AppCompatActivity
                     adapter.notifyDataSetChanged();
                     bgaRefreshLayout.endRefreshing();
                     stateView.showContent();
+                    isReadyForSearch = true;
+                    String msg = "为您找到了"+(addSize)+"条搜索结果";
+                    Toasty.success(recyclerView.getContext(), msg, Toast.LENGTH_SHORT, true).show();
                 }
             }, 500);
         }
         else {
             newsItemList.addAll(newsList);
+            if(newsItemList.size() > 0) {
+                currLastTime = newsItemList.get(newsItemList.size()-1).getmPubTime();
+                currLastTime = TimeHelper.timeBefore(currLastTime, 1);
+            }
             recyclerView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-
+                    isReadyForSearch = true;
                     adapter.notifyDataSetChanged();
                     bgaRefreshLayout.endLoadingMore();
                     stateView.showContent();
@@ -260,18 +286,22 @@ public class SearchResultActivity extends AppCompatActivity
         }
 
 
-        isReadyForSearch = true;
-
     }
 
     @Override
     public void onGetNewsFailed(int failed_id) {
+        System.out.println("fail:" + failed_id);
+        recyclerView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                stateView.showContent();
+                bgaRefreshLayout.endLoadingMore();
+                bgaRefreshLayout.endRefreshing();
+                Toasty.error(recyclerView.getContext(), "网络请求失败", Toasty.LENGTH_SHORT, true).show();
 
-        stateView.showContent();
-        //
-        isReadyForSearch = true;
+            }
+        }, 1000);
     }
-
 
 
     public void clickItem(int position)

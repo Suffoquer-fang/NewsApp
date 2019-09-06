@@ -2,14 +2,17 @@ package com.example.newsapplication.Fragment;
 
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.fragment.app.Fragment;
+
 import com.example.newsapplication.R;
+
+import org.salient.artplayer.MediaPlayerManager;
+import org.salient.artplayer.VideoView;
+import org.salient.artplayer.ui.ControlPanel;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,7 +28,6 @@ public class Fragment_Video extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
 
     public Fragment_Video() {
         // Required empty public constructor
@@ -62,7 +64,24 @@ public class Fragment_Video extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_fragment__video, container, false);
+        View view = inflater.inflate(R.layout.fragment_fragment__video, container, false);
+
+        VideoView videoView = view.findViewById(R.id.video_view);
+        videoView.setUp("http://vfx.mtime.cn/Video/2018/06/27/mp4/180627094726195356.mp4");
+        videoView.setControlPanel(new ControlPanel(getContext()));
+        //videoView.start();
+        return view;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        MediaPlayerManager.instance().pause();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        MediaPlayerManager.instance().releasePlayerAndView(getContext());
+    }
 }

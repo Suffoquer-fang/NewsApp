@@ -6,8 +6,13 @@ import android.database.Cursor;
 
 import com.example.newsapplication.dummy.JsonHelper;
 import com.example.newsapplication.dummy.NewsItem;
+import com.example.newsapplication.dummy.UrlHelper;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +42,7 @@ public class GetNewsHelper {
     //    private Context context;
     private MyDBOpenHelper DBhelper;
 
-    //private UrlHelper urlHelper;
+    private UrlHelper urlHelper;
 
 
     private static int NORMAL = 50;
@@ -47,9 +52,10 @@ public class GetNewsHelper {
 
     public GetNewsHelper(Context c) {
         jsonHelper = new JsonHelper();
-        networkClient = new OkHttpClient.Builder().connectTimeout(1, TimeUnit.SECONDS).readTimeout(1, TimeUnit.SECONDS).retryOnConnectionFailure(false).build();
+        networkClient = new OkHttpClient.Builder().connectTimeout(2, TimeUnit.SECONDS).readTimeout(2, TimeUnit.SECONDS).retryOnConnectionFailure(false).build();
         DBhelper = new MyDBOpenHelper(c, "TEST1.db", null, 1);
 //        db = DBhelper.getReadableDatabase();
+        urlHelper = new UrlHelper();
     }
 
     public GetNewsHelper getInstance(Context c) {
@@ -75,7 +81,7 @@ public class GetNewsHelper {
 
 
     private void getNewsFromNetwork(int size, String channel, String startDate, String endDate, String keyword, Callback callback) {
-        String url = "https://api2.newsminer.net/svc/news/queryNewsList?size=30&startDate=2019-07-01&endDate=2019-07-03&words="+ keyword+ "&categories=" + channel;
+        String url = urlHelper.getURL(size, channel, startDate, endDate, keyword);
         final Request request = new Request.Builder().url(url).get().build();
         Call call = networkClient.newCall(request);
         call.enqueue(callback);
@@ -93,16 +99,16 @@ public class GetNewsHelper {
         if (type == NORMAL)                //normal
         {
             System.out.println("query normal");
-            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs"}, "channel = ?", new String[]{channel}, null, null, "pubtime DESC");
+            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs", "keywords"}, "channel = ?", new String[]{channel}, null, null, "pubtime DESC");
 
         } else if (type == HISTORY)            //history
         {
             System.out.println("q history");
-            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs"}, "isHis = 1", null, null, null, "pubtime DESC");
+            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs", "keywords"}, "isHis = 1", null, null, null, "pubtime DESC");
 
         } else if(type == FAVORITE)                       //Fav
         {
-            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs"}, "isFav = 1", null, null, null, "pubtime DESC");
+            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs", "keywords"}, "isFav = 1", null, null, null, "pubtime DESC");
         }
         System.out.println("get from db");
 
@@ -117,9 +123,25 @@ public class GetNewsHelper {
                 String content = c.getString(c.getColumnIndex("content"));
                 String NewsId = c.getString(c.getColumnIndex("NewsId"));
                 int His = c.getInt(c.getColumnIndex("isHis"));
+
+                byte[] arr = c.getBlob(c.getColumnIndex("keywords"));
+                ByteArrayInputStream stream = new ByteArrayInputStream(arr);
+
+                List<String> keys = new ArrayList<>();
+                try {
+                    ObjectInputStream objectInputStream = new ObjectInputStream(stream);
+                    keys =  (List<String>)objectInputStream.readObject();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+
                 NewsItem i = new NewsItem(title, author, pubtime, null, content, NewsId);
                 if(His == 1)
                     i.setInHistory(true);
+                i.setmKeywords(keys);
 
                 retList.add(i);
                 c.moveToNext();
@@ -136,12 +158,12 @@ public class GetNewsHelper {
             public void onFailure(Call call, IOException e) {
 
                 System.out.println("Net failed");
+                if(channel.equals("推荐"))
+                    listener.onGetNewsFailed(0);
 
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-//                        SQLiteDatabase db = DBhelper.getReadableDatabase();
-//                        List<NewsItem> ret = new ArrayList<>();
                         List<NewsItem> ret = getNewsFromDB(size, channel, startDate, endDate, keyword, NORMAL);
                         if(ret.size() > 0)
                             listener.onGetNewsSuccessful(ret, loadmore);
@@ -153,7 +175,16 @@ public class GetNewsHelper {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                System.out.println("On response");
+
                 String json = response.body().string();
+                System.out.println(json);
+                if(json.length() == 0)
+                {
+                    listener.onGetNewsFailed(1);
+                    return;
+                }
+
                 jsonHelper.parse(json);
                 List<NewsItem> list = jsonHelper.list;
 
@@ -173,6 +204,8 @@ public class GetNewsHelper {
         for (NewsItem item : list) {
             if (isInHistory(item.getmNewsID()))
                 item.setInHistory(true);
+            else if(isInFavorite(item.getmNewsID()))
+                item.setInFavorite(true);
             else
             {
                 addNormal(item);
@@ -181,19 +214,22 @@ public class GetNewsHelper {
     }
 
 
-    public void requestUpdateNews(int size, String channel) {
+    public void requestUpdateNews(int size, String channel, String startDate) {
         if(channel.equals("推荐"))
             getRecommendNews(size, false);
         else
-            getNews(size, channel, "", "", "", newsListener, false);
+            getNews(size, channel, startDate, "", "", newsListener, false);
 
     }
 
     public void requestLoadMoreNews(int size, String channel) {
+
+
         if(channel.equals("推荐"))
             getRecommendNews(size, true);
-        else
+        else {
             getNews(size, channel, "", "", "", newsListener, true);
+        }
     }
 
     public void getRecommendNews(int size, boolean loadmore)
@@ -287,6 +323,21 @@ public class GetNewsHelper {
         cv.put("NewsId", item.getmNewsID());
         cv.put("isHis", 0);
         cv.put("isFav", 0);
+
+        List<String> tmp = item.getmKeywords();
+        ByteArrayOutputStream stream =  new ByteArrayOutputStream();
+        try {
+            ObjectOutputStream outputStream = new ObjectOutputStream(stream);
+            outputStream.writeObject(tmp);
+            outputStream.flush();
+            byte[] arr = stream.toByteArray();
+            cv.put("keywords", arr);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         DBhelper.getReadableDatabase().insert("News", null, cv);
         DBhelper.close();
 
@@ -345,6 +396,136 @@ public class GetNewsHelper {
             DBhelper.close();
             return false;
         }
+    }
+
+
+
+    public void getNewsFromPureNetwork(String channel, String start, String end, final String key, final GetNewsListener listener, final boolean loadmore)
+    {
+
+        if(channel.equals("推荐"))
+        {
+            getRecommendNews(start, end, listener, loadmore);
+            return;
+        }
+
+
+        Callback callback = new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                listener.onGetNewsFailed(0);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                String json = response.body().string();
+                System.out.println(json);
+
+                jsonHelper.parse(json);
+                List<NewsItem> list = jsonHelper.list;
+
+                if(key.equals(""))
+                    checkForHis(list);
+                else {
+
+
+                    List<NewsItem> retList = new ArrayList<>();
+
+                    for (NewsItem item : list) {
+                        if (item.getmTitle().contains(key))
+                            retList.add(0, item);
+                        else
+                            retList.add(item);
+                    }
+                    listener.onGetNewsSuccessful(retList, loadmore);
+                    return;
+                }
+
+
+
+
+
+
+
+
+
+                listener.onGetNewsSuccessful(list, loadmore);
+            }
+        };
+
+
+
+
+
+
+        getNewsFromNetwork(20, channel, start, end, key, callback);
+    }
+
+
+    public void getRecommendNews(final String start, final String end, final GetNewsListener listener, final boolean loadmore)
+    {
+        List<NewsItem> items = getNewsFromDB(10, "", "", "", "", FAVORITE);
+        if(items.size() < 2)
+            items.addAll(getNewsFromDB(10, "", "", "", "", HISTORY));
+        if(items.size() < 2)
+            items.addAll(getNewsFromDB(10, "", "", "", "", NORMAL));
+
+        if(items.size() <= 1)
+        {
+            listener.onGetNewsFailed(0);
+            return;
+        }
+
+        final String key1 = items.get(0).getmKeywords().get(0);
+        final String key2 = items.get(1).getmKeywords().get(0);
+
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<NewsItem> retList = getSearchResult(10, start, end, key1);
+                retList.addAll(getSearchResult(10, start, end, key2));
+
+                List<NewsItem> ret = new ArrayList<>();
+
+                for(NewsItem item : retList)
+                {
+                    if(!isInHistory(item.getmNewsID()))
+                        ret.add(item);
+                }
+
+                if(ret.size() > 0)
+                    listener.onGetNewsSuccessful(ret, loadmore);
+                else
+                    listener.onGetNewsFailed(1);
+
+            }
+        }).start();
+
+    }
+
+    List<NewsItem> getSearchResult(int size, String start, String end, String key)
+    {
+        String url = urlHelper.getURL(10, "", start, end, key);
+        final Request request = new Request.Builder().url(url).get().build();
+        Call call = networkClient.newCall(request);
+        try {
+            Response response = call.execute();
+            if(response.isSuccessful())
+            {
+                String json = response.body().string();
+                System.out.println(json);
+                jsonHelper.parse(json);
+                List<NewsItem> list = jsonHelper.list;
+                return list;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
     }
 
 

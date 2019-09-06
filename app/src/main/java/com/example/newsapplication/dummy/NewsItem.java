@@ -15,6 +15,16 @@ public class NewsItem {
     private boolean isInFavorite = false;
     private String mNewsID;
 
+    public List<String> getmKeywords() {
+        return mKeywords;
+    }
+
+    public void setmKeywords(List<String> mKeywords) {
+        this.mKeywords = mKeywords;
+    }
+
+    private List<String> mKeywords;
+
     public String getmNewsID() {
         return mNewsID;
     }

@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.newsapplication.Fragment.HisFragment;
 import com.example.newsapplication.R;
 
 import java.util.List;

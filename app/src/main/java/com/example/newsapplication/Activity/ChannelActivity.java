@@ -2,9 +2,9 @@ package com.example.newsapplication.Activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -12,10 +12,13 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.newsapplication.R;
 import com.example.newsapplication.Adapter.ChannelAdapter;
+import com.example.newsapplication.R;
 import com.example.newsapplication.dummy.ChannelEntity;
 import com.example.newsapplication.helper.ItemDragHelperCallback;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrConfig;
+import com.r0adkll.slidr.model.SlidrPosition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,12 +37,24 @@ public class ChannelActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_demo);
 
 
         mRecy = (RecyclerView) findViewById(R.id.recy);
         closeBtn = findViewById(R.id.close_btn);
+
+        Slidr slidr = new Slidr();
+        SlidrConfig config = new SlidrConfig.Builder()
+                .position(SlidrPosition.TOP)
+                .sensitivity(1f)
+                .scrimColor(Color.BLACK)
+                .scrimEndAlpha(0f)
+                .velocityThreshold(2400)
+                .distanceThreshold(0.25f)
+                .edge(true | false)
+                .build();
+        slidr.attach(this, config);
+
         init();
     }
 

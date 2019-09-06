@@ -2,6 +2,7 @@ package com.example.newsapplication.dummy;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,6 +27,14 @@ public class JsonHelper {
                 img = null;
             NewsItem item = new NewsItem(i.title, i.publisher, i.publishTime, img, i.content, i.newsID);
             item.setmChannel(i.category);
+
+            List<String> key = new ArrayList<>();
+
+            for(JsonKeyWordOrWhenOrWhereOrWho w : i.keywords)
+            {
+                key.add(w.word);
+            }
+            item.setmKeywords(key);
             list.add(item);
         }
     }

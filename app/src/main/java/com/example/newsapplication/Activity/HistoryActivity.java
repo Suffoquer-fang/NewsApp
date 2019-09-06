@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.example.newsapplication.Adapter.NewsItemRecyclerViewAdapter;
 import com.example.newsapplication.R;
 import com.example.newsapplication.dummy.NewsItem;
@@ -46,6 +47,8 @@ public class HistoryActivity extends AppCompatActivity
     private int lastPosition = 0;
     private int lastOffset = 0;
 
+    boolean isLoading = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +71,7 @@ public class HistoryActivity extends AppCompatActivity
         adapter.setSwipe(true);
 
         bgaRefreshLayout = findViewById(R.id.BGARefreshLayout);
-        stateView = StateView.inject(this);
+        stateView = StateView.wrap(recyclerView);
 
         stateView.setLoadingResource(R.layout.centerloading);
         stateView.showLoading();
@@ -77,6 +80,7 @@ public class HistoryActivity extends AppCompatActivity
         initRecyclerView();
         initSwipe();
 
+        isLoading = true;
         requestNewsData();
     }
 
@@ -163,6 +167,22 @@ public class HistoryActivity extends AppCompatActivity
     public void requestNewsData()
     {
         getNewsHelper.requestHistory(10, false);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if(isLoading)
+                {
+                    System.out.println("still loading");
+                    requestNewsData();
+                }
+            }
+        }).start();
     }
 
 
@@ -179,10 +199,10 @@ public class HistoryActivity extends AppCompatActivity
 
 
     @Override
-    public void onGetNewsSuccessful(List<NewsItem> newsList, boolean loadmore) {
-
+    public void onGetNewsSuccessful(final List<NewsItem> newsList, boolean loadmore) {
+        newsItemList.clear();
+        newsItemList.addAll(0, newsList);
         if(!loadmore) {
-            newsItemList.addAll(0, newsList);
             recyclerView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -190,6 +210,7 @@ public class HistoryActivity extends AppCompatActivity
                     adapter.notifyDataSetChanged();
                     bgaRefreshLayout.endRefreshing();
                     stateView.showContent();
+                    isLoading = false;
                 }
             }, 500);
         }
@@ -212,14 +233,19 @@ public class HistoryActivity extends AppCompatActivity
 
     @Override
     public void onGetNewsFailed(int failed_id) {
+        isLoading = false;
+        recyclerView.post(new Runnable() {
+            @Override
+            public void run() {
 
-        stateView.showContent();
+                stateView.showContent();
+            }
+        });
 
     }
 
     public void clickItem(int position)
     {
-
         Toast.makeText(this, newsItemList.get(position).getmTitle(), Toast.LENGTH_SHORT).show();
         String title = newsItemList.get(position).getmTitle();
         String content = newsItemList.get(position).getmContent();
@@ -247,7 +273,11 @@ public class HistoryActivity extends AppCompatActivity
         NewsItem tmp = newsItemList.remove(position);
         adapter.notifyItemRemoved(position);
         adapter.notifyItemRangeChanged(position, newsItemList.size() - position);//通知重新绑定某一范围内的的数据与界面
-
         getNewsHelper.deleteHistory(tmp);
+    }
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Animatoo.animateSlideRight(this);
     }
 }

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.example.newsapplication.Activity.NewsDetailActivity;
 import com.example.newsapplication.Adapter.NewsItemRecyclerViewAdapter;
 import com.example.newsapplication.R;
@@ -22,6 +23,7 @@ import com.example.newsapplication.dummy.NewsItem;
 import com.example.newsapplication.dummy.UrlHelper;
 import com.example.newsapplication.helper.GetNewsHelper;
 import com.example.newsapplication.helper.GetNewsListener;
+import com.example.newsapplication.helper.TimeHelper;
 import com.github.nukc.stateview.StateView;
 
 import java.io.IOException;
@@ -67,6 +69,9 @@ public class NewsListFragment extends BaseLazyLoadFragment
 
     private int lastPosition = 0;
     private int lastOffset = 0;
+
+    private String currFirstTime = "";
+    private String currLastTime = "";
 
 
 
@@ -237,6 +242,8 @@ public class NewsListFragment extends BaseLazyLoadFragment
                 bundle.putStringArrayList("imgs", arrimgs);
                 intent.putExtras(bundle);
                 startActivity(intent);
+
+                Animatoo.animateSlideLeft(getContext());
             }
         };
     }
@@ -249,18 +256,19 @@ public class NewsListFragment extends BaseLazyLoadFragment
 
     public void requestNewsData()
     {
-        getNewsHelper.requestUpdateNews(15, mCategory);
+        getNewsHelper.getNewsFromPureNetwork(mCategory, currFirstTime, TimeHelper.getCurrentTime(), "", this, false);
     }
 
 
     @Override
     public void onBGARefreshLayoutBeginRefreshing(BGARefreshLayout refreshLayout) {
         requestNewsData();
+
     }
 
     @Override
     public boolean onBGARefreshLayoutBeginLoadingMore(BGARefreshLayout refreshLayout) {
-        getNewsHelper.requestLoadMoreNews(30, mCategory);
+        getNewsHelper.getNewsFromPureNetwork(mCategory, "", currLastTime, "", this, true);
         return true;
     }
 
@@ -274,10 +282,17 @@ public class NewsListFragment extends BaseLazyLoadFragment
     @Override
     public void onGetNewsSuccessful(List<NewsItem> newsList, boolean loadmore) {
         if(!loadmore) {
-            final int originSize = newsItemList.size();
-            final int newSize = newsList.size();
-            newsItemList.clear();
+
             newsItemList.addAll(0, newsList);
+
+            final int addSize = newsList.size();
+
+            if(newsItemList.size() > 0) {
+                currFirstTime = newsItemList.get(0).getmPubTime();
+                currFirstTime = TimeHelper.timeAfter(currFirstTime, 1);
+                currLastTime = newsItemList.get(newsItemList.size()-1).getmPubTime();
+                currLastTime = TimeHelper.timeBefore(currLastTime, 1);
+            }
 
             recyclerView.postDelayed(new Runnable() {
                 @Override
@@ -287,13 +302,17 @@ public class NewsListFragment extends BaseLazyLoadFragment
                     bgaRefreshLayout.endRefreshing();
                     stateView.showContent();
 
-                    String msg = "为您刷新了"+(newSize-originSize)+"条新内容";
+                    String msg = "为您刷新了"+(addSize)+"条新内容";
                     Toasty.success(getContext(), msg, Toast.LENGTH_SHORT, true).show();
                 }
             }, 500);
         }
         else {
             newsItemList.addAll(newsList);
+            if(newsItemList.size() > 0) {
+                currLastTime = newsItemList.get(newsItemList.size()-1).getmPubTime();
+                currLastTime = TimeHelper.timeBefore(currLastTime, 1);
+            }
             recyclerView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -310,7 +329,7 @@ public class NewsListFragment extends BaseLazyLoadFragment
 
     @Override
     public void onGetNewsFailed(int failed_id) {
-
+        System.out.println("fail:" + failed_id);
         recyclerView.postDelayed(new Runnable() {
             @Override
             public void run() {

@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
     android:orientation="horizontal"
-    android:gravity="center">
+    android:gravity="center"
+    >
 
     <ImageView
         android:id="@+id/iv_load1"

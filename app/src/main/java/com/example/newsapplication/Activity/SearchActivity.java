@@ -60,7 +60,18 @@ public class SearchActivity extends AppCompatActivity {
 
         Cursor c = helper.query();
 
-        mAdapter = new MyCursorAdapter(this, c, helper);
+
+
+        mAdapter = new MyCursorAdapter(this, c, helper, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String tmp = ((TextView)view).getText().toString();
+                sv.setQuery(tmp, true);
+            }
+        });
+
+
+
         lv.setAdapter(mAdapter);
 
         Cancel = findViewById(R.id.textView);
@@ -90,6 +101,7 @@ public class SearchActivity extends AppCompatActivity {
         Clear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 mAdapter.clear();
             }
         });
@@ -132,6 +144,13 @@ public class SearchActivity extends AppCompatActivity {
 
 
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Cursor c = helper.query();
+        mAdapter.changeCursor(c);
     }
 
     @Override
