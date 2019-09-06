@@ -92,7 +92,7 @@ public class SearchResultActivity extends AppCompatActivity
         searchView = findViewById(R.id.search);
 
         bgaRefreshLayout = findViewById(R.id.BGARefreshLayout);
-        stateView = StateView.inject(this);
+        stateView = StateView.wrap(recyclerView);
 
         stateView.setLoadingResource(R.layout.centerloading);
         stateView.showLoading();
@@ -298,7 +298,6 @@ public class SearchResultActivity extends AppCompatActivity
                 bgaRefreshLayout.endLoadingMore();
                 bgaRefreshLayout.endRefreshing();
                 Toasty.error(recyclerView.getContext(), "网络请求失败", Toasty.LENGTH_SHORT, true).show();
-
             }
         }, 1000);
     }

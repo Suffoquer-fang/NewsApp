@@ -443,21 +443,9 @@ public class GetNewsHelper {
                 }
 
 
-
-
-
-
-
-
-
                 listener.onGetNewsSuccessful(list, loadmore);
             }
         };
-
-
-
-
-
 
         getNewsFromNetwork(20, channel, start, end, key, callback);
     }
