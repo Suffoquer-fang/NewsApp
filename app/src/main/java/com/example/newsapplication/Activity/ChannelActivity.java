@@ -50,16 +50,26 @@ public class ChannelActivity extends Activity {
 
         items.clear();
         otherItems.clear();
-        for (String name:channels) {
+
+        String[] allChannels = getResources().getStringArray(R.array.category_tab_title);
+
+
+
+        for (String name: channels) {
             ChannelEntity entity = new ChannelEntity();
             entity.setName(name);
             items.add(entity);
         }
 
-        for (int i = 0; i < 20; i++) {
-            ChannelEntity entity = new ChannelEntity();
-            entity.setName("其他" + i);
-            otherItems.add(entity);
+
+
+
+        for (String name : allChannels) {
+            if(!channels.contains(name)) {
+                ChannelEntity entity = new ChannelEntity();
+                entity.setName(name);
+                otherItems.add(entity);
+            }
         }
 
         GridLayoutManager manager = new GridLayoutManager(this, 4);
@@ -74,7 +84,7 @@ public class ChannelActivity extends Activity {
             @Override
             public int getSpanSize(int position) {
                 int viewType = adapter.getItemViewType(position);
-                return viewType == ChannelAdapter.TYPE_MY || viewType == ChannelAdapter.TYPE_OTHER ? 1 : 4;
+                return viewType == ChannelAdapter.TYPE_MY || viewType == ChannelAdapter.TYPE_OTHER || viewType == ChannelAdapter.TYPE_FIX? 1 : 4;
             }
         });
         mRecy.setAdapter(adapter);

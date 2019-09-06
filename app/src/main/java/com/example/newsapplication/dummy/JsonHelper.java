@@ -2,9 +2,6 @@ package com.example.newsapplication.dummy;
 
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -28,6 +25,7 @@ public class JsonHelper {
             if(img.size() == 1 && img.get(0).length() == 0)
                 img = null;
             NewsItem item = new NewsItem(i.title, i.publisher, i.publishTime, img, i.content, i.newsID);
+            item.setmChannel(i.category);
             list.add(item);
         }
     }

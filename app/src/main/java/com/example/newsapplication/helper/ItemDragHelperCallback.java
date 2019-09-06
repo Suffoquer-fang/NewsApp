@@ -28,6 +28,8 @@ public class ItemDragHelperCallback extends ItemTouchHelper.Callback {
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
         // 不同Type之间不可移动
+
+        if(viewHolder.getAdapterPosition() == 0) return false;
         if (viewHolder.getItemViewType() != target.getItemViewType()) {
             return false;
         }

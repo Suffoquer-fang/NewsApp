@@ -31,6 +31,7 @@ import java.util.List;
 import cn.bingoogolapple.refreshlayout.BGANormalRefreshViewHolder;
 import cn.bingoogolapple.refreshlayout.BGARefreshLayout;
 import cn.bingoogolapple.refreshlayout.BGARefreshViewHolder;
+import es.dmoral.toasty.Toasty;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -249,7 +250,6 @@ public class NewsListFragment extends BaseLazyLoadFragment
     public void requestNewsData()
     {
         getNewsHelper.requestUpdateNews(15, mCategory);
-
     }
 
 
@@ -274,7 +274,11 @@ public class NewsListFragment extends BaseLazyLoadFragment
     @Override
     public void onGetNewsSuccessful(List<NewsItem> newsList, boolean loadmore) {
         if(!loadmore) {
+            final int originSize = newsItemList.size();
+            final int newSize = newsList.size();
+            newsItemList.clear();
             newsItemList.addAll(0, newsList);
+
             recyclerView.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -282,6 +286,9 @@ public class NewsListFragment extends BaseLazyLoadFragment
                     adapter.notifyDataSetChanged();
                     bgaRefreshLayout.endRefreshing();
                     stateView.showContent();
+
+                    String msg = "为您刷新了"+(newSize-originSize)+"条新内容";
+                    Toasty.success(getContext(), msg, Toast.LENGTH_SHORT, true).show();
                 }
             }, 500);
         }
@@ -303,6 +310,16 @@ public class NewsListFragment extends BaseLazyLoadFragment
 
     @Override
     public void onGetNewsFailed(int failed_id) {
-        //
+
+        recyclerView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                stateView.showContent();
+                bgaRefreshLayout.endLoadingMore();
+                bgaRefreshLayout.endRefreshing();
+                Toasty.error(getContext(), "刷新失败", Toasty.LENGTH_SHORT, true).show();
+
+            }
+        }, 1000);
     }
 }

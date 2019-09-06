@@ -38,6 +38,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public static final int TYPE_OTHER_CHANNEL_HEADER = 2;
     // 其他频道
     public static final int TYPE_OTHER = 3;
+    public static final int TYPE_FIX = 4;
 
     // 我的频道之前的header数量  该demo中 即标题部分 为 1
     private static final int COUNT_PRE_MY_HEADER = 1;
@@ -75,11 +76,13 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             return TYPE_MY_CHANNEL_HEADER;
         } else if (position == mMyChannelItems.size() + 1) {    // 其他频道 标题部分
             return TYPE_OTHER_CHANNEL_HEADER;
-        } else if (position > 0 && position < mMyChannelItems.size() + 1) {
+        } else if (position > 1 && position < mMyChannelItems.size() + 1) {
             return TYPE_MY;
-        } else {
-            return TYPE_OTHER;
+        } else if (position <= 1) {
+            return TYPE_FIX;
         }
+        else
+            return TYPE_OTHER;
     }
 
     @Override
@@ -102,7 +105,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     }
                 });
                 return holder;
-
+            case TYPE_FIX:
+                view = mInflater.inflate(R.layout.item_my, parent, false);
+                return new MyViewHolder(view);
             case TYPE_MY:
                 view = mInflater.inflate(R.layout.item_my, parent, false);
                 final MyViewHolder myHolder = new MyViewHolder(view);
@@ -145,29 +150,31 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     }
                 });
 
-                myHolder.textView.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(final View v) {
-                        if (!isEditMode) {
-                            RecyclerView recyclerView = ((RecyclerView) parent);
-                            startEditMode(recyclerView);
+                    myHolder.textView.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(final View v) {
+                            if (!isEditMode) {
+                                RecyclerView recyclerView = ((RecyclerView) parent);
+                                startEditMode(recyclerView);
 
-                            // header 按钮文字 改成 "完成"
-                            View view = recyclerView.getChildAt(0);
-                            if (view == recyclerView.getLayoutManager().findViewByPosition(0)) {
-                                TextView tvBtnEdit = (TextView) view.findViewById(R.id.tv_btn_edit);
-                                tvBtnEdit.setText(R.string.finish);
+                                // header 按钮文字 改成 "完成"
+                                View view = recyclerView.getChildAt(0);
+                                if (view == recyclerView.getLayoutManager().findViewByPosition(0)) {
+                                    TextView tvBtnEdit = (TextView) view.findViewById(R.id.tv_btn_edit);
+                                    tvBtnEdit.setText(R.string.finish);
+                                }
                             }
-                        }
 
-                        mItemTouchHelper.startDrag(myHolder);
-                        return true;
-                    }
-                });
+                            mItemTouchHelper.startDrag(myHolder);
+                            return true;
+                        }
+                    });
+
 
                 myHolder.textView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
+
                         if (isEditMode) {
                             switch (MotionEventCompat.getActionMasked(event)) {
                                 case MotionEvent.ACTION_DOWN:
@@ -286,6 +293,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             } else {
                 myHolder.imgEdit.setVisibility(View.INVISIBLE);
             }
+
 
         } else if (holder instanceof OtherViewHolder) {
 
@@ -435,6 +443,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public void onItemMove(int fromPosition, int toPosition) {
+        if(toPosition == 0) return;
         ChannelEntity item = mMyChannelItems.get(fromPosition - COUNT_PRE_MY_HEADER);
         mMyChannelItems.remove(fromPosition - COUNT_PRE_MY_HEADER);
         mMyChannelItems.add(toPosition - COUNT_PRE_MY_HEADER, item);
@@ -450,7 +459,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         isEditMode = true;
 
         int visibleChildCount = parent.getChildCount();
-        for (int i = 0; i < visibleChildCount; i++) {
+        for (int i = 2; i < visibleChildCount; i++) {
             View view = parent.getChildAt(i);
             ImageView imgEdit = (ImageView) view.findViewById(R.id.img_edit);
             if (imgEdit != null) {
@@ -468,7 +477,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         isEditMode = false;
 
         int visibleChildCount = parent.getChildCount();
-        for (int i = 0; i < visibleChildCount; i++) {
+        for (int i = 2; i < visibleChildCount; i++) {
             View view = parent.getChildAt(i);
             ImageView imgEdit = (ImageView) view.findViewById(R.id.img_edit);
             if (imgEdit != null) {

@@ -93,16 +93,16 @@ public class GetNewsHelper {
         if (type == NORMAL)                //normal
         {
             System.out.println("query normal");
-            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId"}, null, null, null, null, "pubtime DESC");
+            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs"}, "channel = ?", new String[]{channel}, null, null, "pubtime DESC");
 
         } else if (type == HISTORY)            //history
         {
             System.out.println("q history");
-            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId"}, "isHis = 1", null, null, null, "pubtime DESC");
+            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs"}, "isHis = 1", null, null, null, "pubtime DESC");
 
         } else if(type == FAVORITE)                       //Fav
         {
-            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId"}, "isFav = 1", null, null, null, "pubtime DESC");
+            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs"}, "isFav = 1", null, null, null, "pubtime DESC");
         }
         System.out.println("get from db");
 
@@ -110,14 +110,17 @@ public class GetNewsHelper {
         if(c == null) return retList;
         System.out.println("c != null");
         if (c.moveToFirst()) {
-            System.out.println("move to f");
             while (!c.isAfterLast()) {
                 String title = c.getString(c.getColumnIndex("title"));
                 String author = c.getString(c.getColumnIndex("author"));
                 String pubtime = c.getString(c.getColumnIndex("pubtime"));
                 String content = c.getString(c.getColumnIndex("content"));
                 String NewsId = c.getString(c.getColumnIndex("NewsId"));
+                int His = c.getInt(c.getColumnIndex("isHis"));
                 NewsItem i = new NewsItem(title, author, pubtime, null, content, NewsId);
+                if(His == 1)
+                    i.setInHistory(true);
+
                 retList.add(i);
                 c.moveToNext();
             }
@@ -140,7 +143,10 @@ public class GetNewsHelper {
 //                        SQLiteDatabase db = DBhelper.getReadableDatabase();
 //                        List<NewsItem> ret = new ArrayList<>();
                         List<NewsItem> ret = getNewsFromDB(size, channel, startDate, endDate, keyword, NORMAL);
-                        listener.onGetNewsSuccessful(ret, loadmore);
+                        if(ret.size() > 0)
+                            listener.onGetNewsSuccessful(ret, loadmore);
+                        else
+                            listener.onGetNewsFailed(0);
                     }
                 }).start();
             }
@@ -176,13 +182,23 @@ public class GetNewsHelper {
 
 
     public void requestUpdateNews(int size, String channel) {
-
-        getNews(size, channel, "", "", "", newsListener, false);
+        if(channel.equals("推荐"))
+            getRecommendNews(size, false);
+        else
+            getNews(size, channel, "", "", "", newsListener, false);
 
     }
 
     public void requestLoadMoreNews(int size, String channel) {
-        getNews(size, channel, "", "", "", newsListener, true);
+        if(channel.equals("推荐"))
+            getRecommendNews(size, true);
+        else
+            getNews(size, channel, "", "", "", newsListener, true);
+    }
+
+    public void getRecommendNews(int size, boolean loadmore)
+    {
+        getNews(size, "", "", "", "", newsListener, loadmore);
     }
 
     public void requestSearchResult(int size, final String keyword) {

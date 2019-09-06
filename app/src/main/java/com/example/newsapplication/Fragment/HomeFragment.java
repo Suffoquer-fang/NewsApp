@@ -15,7 +15,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.newsapplication.Activity.ChannelActivity;
-import com.example.newsapplication.Activity.FavoriteActivity;
+import com.example.newsapplication.Activity.SearchActivity;
 import com.example.newsapplication.Adapter.DynamicFragmentPagerAdapter;
 import com.example.newsapplication.R;
 import com.google.android.material.tabs.TabLayout;
@@ -128,6 +128,7 @@ public class HomeFragment extends BaseLazyLoadFragment
         for(String title : titles)
         {
             categoryList.add(NewsListFragment.newInstance(title, ""));
+
         }
         //TODO
     }
@@ -237,8 +238,7 @@ public class HomeFragment extends BaseLazyLoadFragment
     {
         //fragment1.show(getChildFragmentManager(), "sss");
         //new HisFragment().show(getChildFragmentManager(), "www");
-        //startActivity(new Intent(getActivity(), SearchActivity.class));
+        startActivity(new Intent(getActivity(), SearchActivity.class));
 
-        startActivity(new Intent(getActivity(), FavoriteActivity.class));
     }
 }
