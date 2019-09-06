@@ -1,89 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 
-<androidx.cardview.widget.CardView android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    >
-
-<com.mcxtzhang.swipemenulib.SwipeMenuLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clickable="true"
-    android:id="@+id/swipeMenuLayout"
-    android:paddingBottom="1dp"
-    style="@style/MyTheme"
-    android:background="@color/background_material_light">
+    android:layout_height="wrap_content">
 
-
-
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:id="@+id/content_fav">
-
-
-    <LinearLayout
+    <com.mcxtzhang.swipemenulib.SwipeMenuLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/swipeMenuLayout"
+        style="@style/MyTheme"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        >
+        android:background="@color/background_material_light"
+        android:clickable="true"
+        android:paddingBottom="1dp">
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:maxLines="2"
-            android:paddingBottom="5dp"
-            android:paddingLeft="10dp"
-            android:paddingTop="10dp"
 
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <LinearLayout
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/content_fav"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="10dp"
-            android:paddingLeft="10dp"
-            android:paddingBottom="5dp"
-            >
-            <TextView
-                android:id="@+id/pubtime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="1小时前" />
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/author"
-                android:layout_width="wrap_content"
+
+            <LinearLayout xmlns:colortextview="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:text="新闻集锦" />
+                android:orientation="vertical">
+
+                <!--<loic.teillard.colortextview.ColorTextView-->
+                    <!--android:id="@+id/title"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:gravity="center_vertical"-->
+                    <!--android:maxLines="2"-->
+                    <!--android:paddingLeft="10dp"-->
+                    <!--android:paddingTop="10dp"-->
+                    <!--android:paddingBottom="5dp"-->
+                    <!--colortextview:clt_color1="@color/red1"-->
+                    <!--colortextview:clt_txt1="Text"/>-->
+
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:maxLines="2"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="5dp"
+
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="5dp">
+
+                    <TextView
+                        android:id="@+id/pubtime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1小时前" />
+
+                    <TextView
+                        android:id="@+id/author"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="20dp"
+                        android:text="新闻集锦" />
+                </LinearLayout>
+            </LinearLayout>
+
+
         </LinearLayout>
-    </LinearLayout>
 
 
-</LinearLayout>
+        <Button
+            android:id="@+id/btnDelete"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:background="@color/red_500"
+            android:text="删除"
+            android:textColor="@android:color/white" />
 
 
-
-    <Button
-        android:id="@+id/btnDelete"
-        android:layout_width="60dp"
-        android:layout_height="match_parent"
-        android:background="@color/red_500"
-        android:text="删除"
-        android:textColor="@android:color/white"/>
+    </com.mcxtzhang.swipemenulib.SwipeMenuLayout>
 
 
-</com.mcxtzhang.swipemenulib.SwipeMenuLayout>
-
-
-    </androidx.cardview.widget.CardView>
+</androidx.cardview.widget.CardView>

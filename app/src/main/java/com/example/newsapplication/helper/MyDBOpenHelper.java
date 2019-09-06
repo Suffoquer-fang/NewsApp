@@ -22,7 +22,7 @@ public class MyDBOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE News(_id INTEGER PRIMARY KEY AUTOINCREMENT, NewsId text unique, channel text, title text, author text, pubtime text, Images blob, content text, isHis integer, isFav integer)");
+        db.execSQL("CREATE TABLE News(_id INTEGER PRIMARY KEY AUTOINCREMENT, NewsId text unique, channel text, title text, author text, pubtime text, keyword blob, content text, isHis integer, isFav integer)");
         db.execSQL("CREATE TABLE SearchHis(_id INTEGER PRIMARY KEY AUTOINCREMENT, Time INTEGER, Content TEXT)");
         //this.db = db;
     }

@@ -59,5 +59,9 @@ dependencies {
     implementation 'com.github.mcxtzhang:SwipeDelMenuLayout:V1.3.0'
     implementation 'com.lin:timeline:1.1@aar'
     implementation 'com.github.GrenderG:Toasty:1.4.2'
-
+    implementation 'com.github.medyo:fancybuttons:1.9.1'
+    implementation 'com.wx.goodview:goodview:1.0.0'
+    implementation 'com.github.varunest:sparkbutton:1.0.6'
+    implementation 'loic.teillard.colortextview:colortextview:1.0.0'
+    implementation 'com.github.liuguangli:FloatUtil:1.0'
 }

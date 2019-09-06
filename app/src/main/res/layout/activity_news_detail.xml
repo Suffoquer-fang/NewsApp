@@ -1,77 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 
-<LinearLayout android:layout_height="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="456dp"
         android:layout_gravity="center"
+        android:layout_weight="0.9"
         android:background="@color/background_material_light"
         android:orientation="vertical">
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
+            android:padding="10dp"
             android:id="@+id/linear"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             tools:context=".Activity.NewsDetailActivity">
 
-            <androidx.appcompat.widget.Toolbar
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-            </androidx.appcompat.widget.Toolbar>
 
             <TextView
+                android:textSize="30dp"
                 android:id="@+id/Title_textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:layout_gravity="center"
                 android:layout_marginStart="30dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="30dp"
-
-                android:text="这是一个新闻标题"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                android:textColor="@color/black"
                 app:autoSizeTextType="uniform"
                 app:fontFamily="monospace"
                 app:layout_constraintEnd_toEndOf="parent"
-
                 app:layout_constraintStart_toStartOf="parent"
                 tools:layout_editor_absoluteY="48dp"
 
-
                 />
-
-            <com.qmuiteam.qmui.widget.textview.QMUISpanTouchFixTextView
-                android:id="@+id/Contet_textView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:autoSizeTextType="uniform"
-                android:elegantTextHeight="true"
-                android:ems="10"
-                android:fallbackLineSpacing="true"
-                android:textSize="20dp" />
-
 
         </LinearLayout>
     </ScrollView>
 
-
-    <ImageView
-        android:id="@+id/share"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:scaleType="fitXY"
-        android:src="@drawable/search_background_1" />
+        android:layout_weight="0.03"
+        android:background="@color/qmui_config_color_white"
+        android:divider="@color/black"
+        android:orientation="horizontal"
+        android:showDividers="end">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2" />
+
+        <com.varunest.sparkbutton.SparkButton
+            android:id="@+id/like"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_weight="0.2"
+            app:sparkbutton_activeImage="@drawable/favourite"
+            app:sparkbutton_iconSize="40dp"
+            app:sparkbutton_inActiveImage="@drawable/heart"
+            app:sparkbutton_primaryColor="@color/red2"
+            app:sparkbutton_secondaryColor="@color/red1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2"/>
+
+        <com.varunest.sparkbutton.SparkButton
+            android:id="@+id/share"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_weight="0.2"
+            app:sparkbutton_activeImage="@drawable/share"
+            app:sparkbutton_iconSize="40dp"
+            app:sparkbutton_inActiveImage="@drawable/black_share"
+            app:sparkbutton_primaryColor="@color/blue1"
+            app:sparkbutton_secondaryColor="@color/blue2" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2"/>
+
+    </LinearLayout>
+
 
 </LinearLayout>
