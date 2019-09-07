@@ -4,7 +4,11 @@
     android:layout_height="wrap_content"
     android:paddingTop="10dp"
     android:paddingBottom="10dp"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:id="@+id/content_lay"
+    android:clickable="true">
+
+
 
     <ImageView
         android:id="@+id/clock"
@@ -23,9 +27,9 @@
         android:textSize="15dp"
         android:layout_margin="1dp"
         android:layout_marginLeft="20dp"
-        android:clickable="true"
+
         android:textAppearance="?attr/textAppearanceListItem" />
-    
+
     <ImageView
         android:id="@+id/close"
         android:layout_width="30dp"

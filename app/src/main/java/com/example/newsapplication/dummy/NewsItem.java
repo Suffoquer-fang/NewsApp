@@ -1,5 +1,7 @@
 package com.example.newsapplication.dummy;
 
+import androidx.annotation.Nullable;
+
 import java.util.List;
 
 public class NewsItem {
@@ -151,4 +153,11 @@ public class NewsItem {
         this.mChannel = mChannel;
     }
 
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if(obj instanceof NewsItem)
+            return this.mNewsID.equals(((NewsItem) obj).mNewsID);
+        else
+            return false;
+    }
 }

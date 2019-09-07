@@ -60,44 +60,10 @@ public class ShareUtil {
     }
 
     /**
-     * 分享网页
-     */
-    public void shareUrl(String packageName,String className,String content,String title,String subject){
-        Intent intent =new Intent();
-        intent.setAction(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-//      if(null != className && null != packageName && !TextUtils.isEmpty(className) && !TextUtils.isEmpty(packageName)){
-//
-//      }else {
-//          if(null != packageName && !TextUtils.isEmpty(packageName)){
-//              intent.setPackage(packageName);
-//          }
-//      }
-        if(stringCheck(className) && stringCheck(packageName)){
-            ComponentName componentName = new ComponentName(packageName, className);
-            intent.setComponent(componentName);
-        }else if(stringCheck(packageName)){
-            intent.setPackage(packageName);
-        }
-
-        intent.putExtra(Intent.EXTRA_TEXT, content);
-        if(null != title && !TextUtils.isEmpty(title)){
-            intent.putExtra(Intent.EXTRA_TITLE, title);
-        }
-        if(null != subject && !TextUtils.isEmpty(subject)){
-            intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        }
-        intent.putExtra(Intent.EXTRA_TITLE, title);
-        Intent chooserIntent = Intent.createChooser(intent, "分享到：");
-        context.startActivity(chooserIntent);
-    }
-
-    /**
      * 分享图片
      */
-    public void shareImg(String packageName,String className,File file){
-        if(file.exists()){
-            Uri uri = Uri.fromFile(file);
+    public void shareImg(String packageName,String className,Uri uri){
+
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_SEND);
             intent.setType("image/*");
@@ -109,57 +75,14 @@ public class ShareUtil {
             intent.putExtra(Intent.EXTRA_STREAM, uri);
             Intent chooserIntent = Intent.createChooser(intent, "分享到:");
             context.startActivity(chooserIntent);
-        }else {
-            Toast.makeText(context, "文件不存在", Toast.LENGTH_SHORT).show();
-        }
+
     }
 
-    /**
-     * 分享音乐
-     */
-    public void shareAudio(String packageName,String className,File file){
-        if(file.exists()){
-            Uri uri = Uri.fromFile(file);
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_SEND);
-            intent.setType("audio/*");
-            if(stringCheck(packageName) && stringCheck(className)){
-                intent.setComponent(new ComponentName(packageName, className));
-            }else if (stringCheck(packageName)) {
-                intent.setPackage(packageName);
-            }
-            intent.putExtra(Intent.EXTRA_STREAM, uri);
-            Intent chooserIntent = Intent.createChooser(intent, "分享到:");
-            context.startActivity(chooserIntent);
-        }else {
-            Toast.makeText(context, "文件不存在", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    /**
-     * 分享视频
-     */
-    public void shareVideo(String packageName,String className,File file){
-        setIntent("video/*", packageName, className, file);
-    }
-
-    public void setIntent(String type,String packageName,String className,File file){
-        if(file.exists()){
-            Uri uri = Uri.fromFile(file);
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_SEND);
-            intent.setType(type);
-            if(stringCheck(packageName) && stringCheck(className)){
-                intent.setComponent(new ComponentName(packageName, className));
-            }else if (stringCheck(packageName)) {
-                intent.setPackage(packageName);
-            }
-            intent.putExtra(Intent.EXTRA_STREAM, uri);
-            Intent chooserIntent = Intent.createChooser(intent, "分享到:");
-            context.startActivity(chooserIntent);
-        }else {
-            Toast.makeText(context, "文件不存在", Toast.LENGTH_SHORT).show();
-        }
+    public void share(String text, Uri uri){
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        //intent.setType()
     }
 
     /**

@@ -3,6 +3,7 @@ package com.example.newsapplication.helper;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.example.newsapplication.dummy.JsonHelper;
 import com.example.newsapplication.dummy.NewsItem;
@@ -15,6 +16,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -39,23 +41,25 @@ public class GetNewsHelper {
         return DBhelper;
     }
 
-    //    private Context context;
+    private Context context;
     private MyDBOpenHelper DBhelper;
 
     private UrlHelper urlHelper;
 
 
-    private static int NORMAL = 50;
+    private static int NORMAL = 0;
     private static int HISTORY = 1;
     private static int FAVORITE = 2;
+
 
 
     public GetNewsHelper(Context c) {
         jsonHelper = new JsonHelper();
         networkClient = new OkHttpClient.Builder().connectTimeout(2, TimeUnit.SECONDS).readTimeout(2, TimeUnit.SECONDS).retryOnConnectionFailure(false).build();
-        DBhelper = new MyDBOpenHelper(c, "TEST1.db", null, 1);
+        DBhelper = MyDBOpenHelper.getInstance(c, "TEST1.db", null, 1);
 //        db = DBhelper.getReadableDatabase();
         urlHelper = new UrlHelper();
+        context = c;
     }
 
     public GetNewsHelper getInstance(Context c) {
@@ -99,16 +103,16 @@ public class GetNewsHelper {
         if (type == NORMAL)                //normal
         {
             System.out.println("query normal");
-            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs", "keywords"}, "channel = ?", new String[]{channel}, null, null, "pubtime DESC");
+            c = DBhelper.getDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs", "keywords"}, "channel = ?", new String[]{channel}, null, null, "pubtime DESC");
 
         } else if (type == HISTORY)            //history
         {
             System.out.println("q history");
-            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs", "keywords"}, "isHis = 1", null, null, null, "pubtime DESC");
+            c = DBhelper.getDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs", "keywords"}, "isHis = 1", null, null, null, "pubtime DESC");
 
         } else if(type == FAVORITE)                       //Fav
         {
-            c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs", "keywords"}, "isFav = 1", null, null, null, "pubtime DESC");
+            c = DBhelper.getDatabase().query("News", new String[]{"_id", "title", "author", "pubtime", "content", "NewsId", "isHIs", "keywords"}, "isFav = 1", null, null, null, "pubtime DESC");
         }
         System.out.println("get from db");
 
@@ -148,7 +152,7 @@ public class GetNewsHelper {
             }
         }
         c.close();
-        DBhelper.close();
+        DBhelper.closeDatabase();
         return retList;
     }
 
@@ -186,7 +190,8 @@ public class GetNewsHelper {
                 }
 
                 jsonHelper.parse(json);
-                List<NewsItem> list = jsonHelper.list;
+                List<NewsItem> list = new ArrayList<>();
+                list.addAll(jsonHelper.list);
 
 
                 checkForHis(list);
@@ -201,16 +206,52 @@ public class GetNewsHelper {
 
     public void checkForHis(List<NewsItem> list)
     {
+        SQLiteDatabase db = DBhelper.getDatabase();
+        if(list == null || list.size() == 0)
+            return;
         for (NewsItem item : list) {
-            if (isInHistory(item.getmNewsID()))
-                item.setInHistory(true);
-            else if(isInFavorite(item.getmNewsID()))
-                item.setInFavorite(true);
+            Cursor c = db.query("News", new String[]{"_id", "isHis", "isFav"}, "NewsId = ?", new String[]{item.getmNewsID()}, null, null, null);
+            if(!c.moveToFirst())
+            {
+                ContentValues cv = new ContentValues();
+                cv.put("title", item.getmTitle());
+                cv.put("author", item.getmAuthor());
+                cv.put("pubtime", item.getmPubTime());
+                cv.put("content", item.getmContent());
+                cv.put("channel", item.getmChannel());
+                cv.put("NewsId", item.getmNewsID());
+                cv.put("isHis", 0);
+                cv.put("isFav", 0);
+
+                List<String> tmp = item.getmKeywords();
+                if(tmp == null) tmp = new ArrayList<>();
+                ByteArrayOutputStream stream =  new ByteArrayOutputStream();
+                try {
+                    ObjectOutputStream outputStream = new ObjectOutputStream(stream);
+                    outputStream.writeObject(tmp);
+                    outputStream.flush();
+                    byte[] arr = stream.toByteArray();
+                    cv.put("keywords", arr);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+                db.insert("News", null, cv);
+            }
             else
             {
-                addNormal(item);
+                int his = c.getInt(c.getColumnIndex("isHis"));
+                int fav = c.getInt(c.getColumnIndex("isFav"));
+                item.setInHistory(his == 1);
+                item.setInFavorite(fav == 1);
             }
+
+        c.close();
         }
+
+        DBhelper.closeDatabase();
     }
 
 
@@ -248,7 +289,9 @@ public class GetNewsHelper {
             public void onResponse(Call call, Response response) throws IOException {
                 String json = response.body().string();
                 jsonHelper.parse(json);
-                List<NewsItem> list = jsonHelper.list;
+                List<NewsItem> list = new ArrayList<>();
+                list.addAll(jsonHelper.list);
+
 
                 List<NewsItem> retList = new ArrayList<>();
 
@@ -294,24 +337,24 @@ public class GetNewsHelper {
         del.setInHistory(false);
         ContentValues cv = new ContentValues();
         cv.put("isHis", 0);
-        DBhelper.getReadableDatabase().update("News", cv, "NewsId = ?", new String[]{del.getmNewsID()});
+        DBhelper.getDatabase().update("News", cv, "NewsId = ?", new String[]{del.getmNewsID()});
      //   db.close();
-        DBhelper.close();
+        DBhelper.closeDatabase();
         return true;
     }
 
     public boolean deleteFavorite(NewsItem del) {
         ContentValues cv = new ContentValues();
         cv.put("isFav", 0);
-        DBhelper.getReadableDatabase().update("News", cv, "NewsId = ?", new String[]{del.getmNewsID()});
+        DBhelper.getDatabase().update("News", cv, "NewsId = ?", new String[]{del.getmNewsID()});
 
-        DBhelper.close();
+        DBhelper.closeDatabase();
         return true;
     }
 
     public boolean addNormal(NewsItem item) {
 
-        Cursor c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "NewsId"}, "NewsId = ?", new String[]{item.getmNewsID()}, null, null, null);
+        Cursor c = DBhelper.getDatabase().query("News", new String[]{"_id", "NewsId"}, "NewsId = ?", new String[]{item.getmNewsID()}, null, null, null);
         if(c.moveToFirst()) return false;
         System.out.println("add normal");
         ContentValues cv = new ContentValues();
@@ -338,8 +381,8 @@ public class GetNewsHelper {
         }
 
 
-        DBhelper.getReadableDatabase().insert("News", null, cv);
-        DBhelper.close();
+        DBhelper.getDatabase().insert("News", null, cv);
+        DBhelper.closeDatabase();
 
 //        db.close();
         return true;
@@ -349,18 +392,18 @@ public class GetNewsHelper {
         item.setInHistory(true);
         ContentValues cv = new ContentValues();
         cv.put("isHis", 1);
-        int ret = DBhelper.getReadableDatabase().update("News", cv, "NewsId = ?", new String[]{item.getmNewsID()});
+        int ret = DBhelper.getDatabase().update("News", cv, "NewsId = ?", new String[]{item.getmNewsID()});
         //db.close();
-        DBhelper.close();
+        DBhelper.closeDatabase();
         return true;
     }
 
     public boolean addFavorite(NewsItem item) {
         ContentValues cv = new ContentValues();
         cv.put("isFav", 1);
-        int ret = DBhelper.getReadableDatabase().update("News", cv, "NewsId = ?", new String[]{item.getmNewsID()});
+        int ret = DBhelper.getDatabase().update("News", cv, "NewsId = ?", new String[]{item.getmNewsID()});
         //db.close();
-        DBhelper.close();
+        DBhelper.closeDatabase();
         return true;
     }
 
@@ -368,34 +411,51 @@ public class GetNewsHelper {
         //return false;
         if(newsID == null) return false;
 
-        Cursor c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "isHis"}, "NewsId = ?", new String[]{newsID}, null, null, null);
-        if(!c.moveToFirst()) return false;
+        Cursor c = DBhelper.getDatabase().query("News", new String[]{"_id", "isHis"}, "NewsId = ?", new String[]{newsID}, null, null, null);
+        if(!c.moveToFirst()) {
+            c.close();
+            DBhelper.closeDatabase();
+            return false;
+        }
         if (c.getInt(c.getColumnIndex("isHis")) == 1){
             c.close();
-            DBhelper.close();
+            DBhelper.closeDatabase();
             return true;
         }
         else {
             c.close();
-            DBhelper.close();
+            DBhelper.closeDatabase();
             return false;
         }
     }
 
     public boolean isInFavorite(String newsID) {
-        Cursor c = DBhelper.getReadableDatabase().query("News", new String[]{"_id", "isFav"}, "NewsId = ?", new String[]{newsID}, null, null, null);
+        Cursor c = DBhelper.getDatabase().query("News", new String[]{"_id", "isFav"}, "NewsId = ?", new String[]{newsID}, null, null, null);
         //db.close();
-        if(!c.moveToFirst()) return false;
+
+        if(!c.moveToFirst()) {
+            c.close();
+            DBhelper.closeDatabase();
+            return false;
+        }
         if (c.getInt(c.getColumnIndex("isFav")) == 1) {
             c.close();
-            DBhelper.close();
+            DBhelper.closeDatabase();
             return true;
         }
         else {
             c.close();
-            DBhelper.close();
+            DBhelper.closeDatabase();
             return false;
         }
+    }
+
+    public boolean isInNormal(String newsID)
+    {
+        Cursor c = DBhelper.getDatabase().query("News", new String[]{"_id", "NewsId"}, "NewsId = ?", new String[]{newsID}, null, null, null);
+        //db.close();
+        if(!c.moveToFirst()) return false;
+        return true;
     }
 
 
@@ -405,7 +465,7 @@ public class GetNewsHelper {
 
         if(channel.equals("推荐"))
         {
-            getRecommendNews(start, end, listener, loadmore);
+            getRecommendNews("", end, listener, loadmore);
             return;
         }
 
@@ -423,16 +483,18 @@ public class GetNewsHelper {
                 System.out.println(json);
 
                 jsonHelper.parse(json);
-                List<NewsItem> list = jsonHelper.list;
+                List<NewsItem> list = new ArrayList<>();
+                list.addAll(jsonHelper.list);
 
-                if(key.equals(""))
-                    checkForHis(list);
-                else {
-
-
+                checkForHis(list);
+                if(!key.equals(""))
+                {
                     List<NewsItem> retList = new ArrayList<>();
 
+
+
                     for (NewsItem item : list) {
+                       if(isBad(item.getmKeywords())) continue;
                         if (item.getmTitle().contains(key))
                             retList.add(0, item);
                         else
@@ -443,6 +505,7 @@ public class GetNewsHelper {
                 }
 
 
+
                 listener.onGetNewsSuccessful(list, loadmore);
             }
         };
@@ -451,44 +514,63 @@ public class GetNewsHelper {
     }
 
 
-    public void getRecommendNews(final String start, final String end, final GetNewsListener listener, final boolean loadmore)
-    {
-        List<NewsItem> items = getNewsFromDB(10, "", "", "", "", FAVORITE);
-        if(items.size() < 2)
-            items.addAll(getNewsFromDB(10, "", "", "", "", HISTORY));
-        if(items.size() < 2)
-            items.addAll(getNewsFromDB(10, "", "", "", "", NORMAL));
 
-        if(items.size() <= 1)
+    public void getNewsOffline(final int size, final String channel, final GetNewsListener listener)
+    {
+
+        if(channel.equals("推荐"))
         {
-            listener.onGetNewsFailed(0);
+            listener.onGetNewsFailed(2);
             return;
         }
 
-        final String key1 = items.get(0).getmKeywords().get(0);
-        final String key2 = items.get(1).getmKeywords().get(0);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<NewsItem> ret = getNewsFromDB(size, channel, "", "", "", NORMAL);
+                if(ret.size() > 0)
+                    listener.onGetNewsSuccessful(ret, false);
+                else
+                    listener.onGetNewsFailed(2);
+            }
+        }).start();
+    }
 
+
+    public void getRecommendNews(final String start, final String end, final GetNewsListener listener, final boolean loadmore)
+    {
+        final List<NewsItem> items = getNewsFromDB(10, "", "", "", "", FAVORITE);
+        if(items.size() < 2)
+            items.addAll(getNewsFromDB(10, "", "", "", "", HISTORY));
+
+        if(items.size() < 2)
+        {
+            listener.onGetNewsFailed(2);
+            return;
+        }
 
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                List<NewsItem> retList = getSearchResult(10, start, end, key1);
-                retList.addAll(getSearchResult(10, start, end, key2));
-
+                List<NewsItem> retList = new ArrayList<>();
                 List<NewsItem> ret = new ArrayList<>();
-
-                for(NewsItem item : retList)
-                {
-                    if(!isInHistory(item.getmNewsID()))
-                        ret.add(item);
+                int size = 10;
+                while(ret.size() <= 25 && size < 50) {
+                    int r= new Random().nextInt(items.size());
+                    final String key1 = items.get(r).getmKeywords().get(0);
+                    retList.addAll(getSearchResult(size + 10, start, end, key1));
+                    size += 10;
+                    for (NewsItem item : retList) {
+                        if (!ret.contains(item) && !isInHistory(item.getmNewsID())) {
+                           if(isBad(item.getmKeywords())) continue;
+                            ret.add(0, item);
+                            addNormal(item);
+                        }
+                    }
                 }
 
-                if(ret.size() > 0)
-                    listener.onGetNewsSuccessful(ret, loadmore);
-                else
-                    listener.onGetNewsFailed(1);
-
+                listener.onGetNewsSuccessful(ret, loadmore);
             }
         }).start();
 
@@ -506,7 +588,13 @@ public class GetNewsHelper {
                 String json = response.body().string();
                 System.out.println(json);
                 jsonHelper.parse(json);
-                List<NewsItem> list = jsonHelper.list;
+                List<NewsItem> list = new ArrayList<>();
+                list.addAll(jsonHelper.list);
+
+                checkForHis(list);
+
+
+
                 return list;
             }
         } catch (IOException e) {
@@ -514,6 +602,40 @@ public class GetNewsHelper {
         }
 
         return new ArrayList<>();
+    }
+
+
+    public void addNewKeyword(String add)
+    {
+        SQLiteDatabase db = DBhelper.getDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("Content", add);
+        db.insert("BadKeys", null, cv);
+        DBhelper.closeDatabase();
+    }
+
+    public boolean isBad(List<String> keys)
+    {
+        SQLiteDatabase db = DBhelper.getDatabase();
+        boolean flag = false;
+        for(String key : keys) {
+            Cursor c = db.query("BadKeys", new String[]{"_id", "Content"}, "Content = ?", new String[]{key}, null, null, null);
+            if (c.moveToFirst()) {
+                flag = true;
+                c.close();
+                break;
+                }
+            c.close();
+        }
+        DBhelper.closeDatabase();
+        return flag;
+    }
+
+    public synchronized void clear()
+    {
+        SQLiteDatabase db = DBhelper.getDatabase();
+        db.delete("BadKeys", null, null);
+        DBhelper.closeDatabase();
     }
 
 

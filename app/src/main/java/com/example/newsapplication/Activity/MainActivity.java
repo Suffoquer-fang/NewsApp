@@ -23,6 +23,8 @@ import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+import fm.jiecao.jcvideoplayer_lib.JCVideoPlayer;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener
 {
@@ -30,6 +32,8 @@ public class MainActivity extends AppCompatActivity
     private ViewPager mViewPager;
     private TabLayout mTabLayout;
     private List<Fragment> fragmentList;
+
+    private boolean isOnline = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +44,16 @@ public class MainActivity extends AppCompatActivity
         //setSupportActionBar(toolbar);
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-
-
-        navigationView.setNavigationItemSelectedListener(this);
-
+//        NavigationView navigationView = findViewById(R.id.nav_view);
+//
+//
+//        navigationView.setNavigationItemSelectedListener(this);
+//        navigationView.setVisibility(View.INVISIBLE);
 
 
 
         initViewPager();
+
 
 
     }
@@ -60,7 +65,8 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-
+            if(JCVideoPlayer.backPress())
+                return;
             super.onBackPressed();
         }
     }
@@ -186,6 +192,17 @@ public class MainActivity extends AppCompatActivity
         System.out.println("finish");
         moveTaskToBack(true);
     }
+
+    public boolean getIsOnline()
+    {
+        return isOnline;
+    }
+
+    public void setOnline(boolean t)
+    {
+        isOnline = t;
+    }
+
 
 
 }

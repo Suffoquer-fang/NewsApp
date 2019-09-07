@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -80,6 +79,7 @@ public class HistoryActivity extends AppCompatActivity
         initRecyclerView();
         initSwipe();
 
+        setTitle("JARSA NEWS 浏览历史");
         isLoading = true;
         requestNewsData();
     }
@@ -114,7 +114,7 @@ public class HistoryActivity extends AppCompatActivity
         final TimeLineDecoration decoration = new TimeLineDecoration(this)
                 .setLineColor(android.R.color.black)
                 .setLineWidth(1)
-                .setLeftDistance(10)
+                .setLeftDistance(25)
                 .setTopDistance(16)
                 .setMarkerRadius(8).setBeginMarker(R.drawable.begin_marker)
                 .setMarkerColor(R.color.colorAccent)
@@ -246,11 +246,13 @@ public class HistoryActivity extends AppCompatActivity
 
     public void clickItem(int position)
     {
-        Toast.makeText(this, newsItemList.get(position).getmTitle(), Toast.LENGTH_SHORT).show();
         String title = newsItemList.get(position).getmTitle();
         String content = newsItemList.get(position).getmContent();
         List<String> imgs= newsItemList.get(position).getmImages();
         ArrayList<String> arrimgs = new ArrayList<>();
+
+        String newsID = newsItemList.get(position).getmNewsID();
+
         if (imgs == null)
             arrimgs = null;
         else
@@ -263,8 +265,13 @@ public class HistoryActivity extends AppCompatActivity
         bundle.putString("title", title);
         bundle.putString("content", content);
         bundle.putStringArrayList("imgs", arrimgs);
+        bundle.putString("ID", newsID);
         intent.putExtras(bundle);
         startActivity(intent);
+
+
+
+        Animatoo.animateSlideLeft(this);
     }
 
 

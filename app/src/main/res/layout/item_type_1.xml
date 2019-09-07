@@ -8,22 +8,25 @@
     android:clickable="true"
     android:paddingBottom="1dp"
     android:id="@+id/swipeMenuLayout"
-    style="@style/MyTheme"
-    android:background="@color/background_material_light">
+    style="@style/MyTheme">
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:id="@+id/content_fav"
+
+    android:background="@drawable/item_selector"
     >
     <LinearLayout
-        android:layout_width="300dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:layout_weight="1"
+        android:layout_marginEnd="@dimen/dp_10"
         >
 
-        <TextView
+        <com.liyi.highlight.HighlightTextView
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -32,44 +35,54 @@
             android:paddingBottom="5dp"
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
-            android:textColor="#696969"
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingTop="10dp"
             android:paddingLeft="10dp"
-            android:paddingBottom="5dp"
+            android:layout_marginTop="10dp"
+            android:id="@+id/relative"
             >
             <TextView
                 android:id="@+id/pubtime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1小时前" />
-
+                android:text="1小时前"
+                />
             <TextView
                 android:id="@+id/author"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/pubtime"
+                android:text="新闻集锦"
                 android:layout_marginLeft="20dp"
-                android:text="新闻集锦" />
-        </LinearLayout>
+                />
+            <ImageView
+                android:layout_alignParentEnd="true"
+                android:id="@+id/close_btn"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/icon_close"/>
+        </RelativeLayout>
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
+        android:layout_weight="3"
         >
 
         <ImageView
             android:id="@+id/image_type_1"
-            android:layout_width="100dp"
+            android:layout_width="match_parent"
             android:layout_height="80dp"
-            android:src="@drawable/tmp" />
+            android:scaleType="fitXY"
+            android:src="@drawable/tmp"
+            />
 
     </RelativeLayout>
 </LinearLayout>

@@ -1,6 +1,6 @@
 package com.example.newsapplication.Activity;
 
-import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,107 +14,175 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.bumptech.glide.Glide;
 import com.example.newsapplication.R;
+import com.example.newsapplication.dummy.NewsItem;
+import com.example.newsapplication.helper.GetNewsHelper;
+import com.example.newsapplication.helper.ShareAnyWhere;
 import com.example.newsapplication.helper.ShareUtil;
 import com.qmuiteam.qmui.widget.textview.QMUISpanTouchFixTextView;
 import com.r0adkll.slidr.Slidr;
-import com.r0adkll.slidr.model.SlidrConfig;
-import com.r0adkll.slidr.model.SlidrPosition;
+import com.varunest.sparkbutton.SparkButton;
+import com.varunest.sparkbutton.SparkEventListener;
 
 import java.util.ArrayList;
 
 public class NewsDetailActivity extends AppCompatActivity {
     private Slidr slidr;
     private ImageView imageView;
+    private SparkButton favourite;
+    private SparkButton share;
+    private ShareUtil shareUtil;
+    private ShareAnyWhere shareAnyWhere;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_news_detail);
 
-        final ShareUtil shareUtil = new ShareUtil(this);
+        shareUtil = new ShareUtil(this);
 
-        imageView = findViewById(R.id.share);
-        imageView.setOnClickListener(new View.OnClickListener() {
+        favourite = findViewById(R.id.like);
+        share = findViewById(R.id.share);
+        shareAnyWhere = new ShareAnyWhere();
+        setTitle("JARSA NEWS");
+
+
+        final Bundle bundle = getIntent().getExtras();
+
+        final String id = bundle.getString("ID");
+
+
+        boolean fav = new GetNewsHelper(getApplicationContext()).isInFavorite(id);
+
+        favourite.setChecked(fav);
+
+        System.out.println("isFav" +  fav);
+
+        favourite.setEventListener(new SparkEventListener() {
             @Override
-            public void onClick(View view) {
-                int rand = (int)Math.random() * 4;
-                switch (rand) {
-                    // qq&文字
-                    case 0:
-                        shareUtil.shareText("com.tencent.mobileqq", null, "这是一条分享信息",
-                                "分享标题", "分享主题");
-                        break;
-                    // 微信&文字
-                    case 1:
-                        shareUtil.shareText("com.tencent.mm", null, "这是一条分享信息", "分享标题",
-                                "分享主题");
-                        break;
-                    // 所有&文字
-                    case 2:
-                        shareUtil.shareText(null, null, "这是一条分享信息", "分享标题", "分享主题");
-                        break;
-                    // 微信朋友&文字
-                    case 3:
-                        if (shareUtil.checkInstall("com.tencent.mm")) {
-                            shareUtil.shareText("com.tencent.mm",
-                                    "com.tencent.mm.ui.tools.ShareImgUI",
-                                    "https://www.aiipu.com/", "分享标题", "分享主题");
-                        } else {
-                            shareUtil.toInstallWebView("https://weixin.qq.com/download");
-                        }
-                        break;
-                    // qq朋友&文字
-                    case 4:
-                        if (shareUtil.checkInstall("com.tencent.mobileqq")) {
-                            shareUtil.shareText("com.tencent.mobileqq",
-                                    "com.tencent.mobileqq.activity.JumpActivity",
-                                    "https://www.aiipu.com/", "分享标题", "分享主题");
-                        } else {
-                            shareUtil.toInstallWebView("https://im.qq.com/mobileqq/");
-                        }
-                        break;
-                }
+            public void onEvent(ImageView button, boolean buttonState) {
+
+            }
+
+            @Override
+            public void onEventAnimationEnd(ImageView button, boolean buttonState) {
+                NewsItem item = new NewsItem("sds");
+                item.setmNewsID(id);
+                if(buttonState)
+                    new GetNewsHelper(getApplicationContext()).addFavorite(item);
+                else
+                    new GetNewsHelper(getApplicationContext()).deleteFavorite(item);
+            }
+
+            @Override
+            public void onEventAnimationStart(ImageView button, boolean buttonState) {
+
             }
         });
 
 
         slidr = new Slidr();
-        SlidrConfig config = new SlidrConfig.Builder()
-                .position(SlidrPosition.LEFT)
-                .sensitivity(1f)
-                .scrimColor(Color.BLACK)
-                .scrimStartAlpha(0.8f)
-                .scrimEndAlpha(0f)
-                .velocityThreshold(2400)
-                .distanceThreshold(0.25f)
-                .edge(true | false)
-                .edgeSize(0.18f)
-                .build();
-        slidr.attach(this, config);
+
+        slidr.attach(this);
 
 
-        Bundle bundle = getIntent().getExtras();
 
         LinearLayout linearLayout = findViewById(R.id.linear);
 
         ArrayList<String> list = bundle.getStringArrayList("imgs");
-        if (list != null)
-            for (String url : list) {
+
+
+        String text = bundle.getString("content");
+        text = text.replaceAll(" ", "").replaceAll(String.valueOf(((char) 12288)), "").replaceAll("\\n+", "\n");
+        text = "        " + text.replaceAll("返回搜狐.*", "").replaceAll("责任编辑：", "");
+        text = text.replaceAll("\\n", "\n        ").replaceAll(".*原标题.*\\n", "");
+        String[] texts = text.split("\\n");
+
+        if (list != null) {
+            int cnt, len, part, index;
+            StringBuilder stringBuilder = new StringBuilder();
+            cnt = list.size();
+            len = text.length();
+            part = len / cnt;
+            cnt = 0;
+            index = 0;
+            for (String i : texts) {
+                cnt += i.length();
+                stringBuilder.append(i);
+                stringBuilder.append("\n");
+                if (stringBuilder.length() > part) {
+                    QMUISpanTouchFixTextView textView = new QMUISpanTouchFixTextView(this);
+                    textView.setText(stringBuilder.toString());
+
+                    stringBuilder.setLength(0);
+                    textView.setEms(10);
+                    textView.setTextSize(20);
+                    ImageView imageView = new ImageView(this);
+                    Glide.with(this).load(list.get(index)).into(imageView);
+                    imageView.setPadding(0, 5, 0, 5);
+                    linearLayout.addView(textView);
+                    linearLayout.addView(imageView);
+
+                    index++;
+                }
+            }
+            if (index == list.size() - 1) {
                 ImageView imageView = new ImageView(this);
 
-                Glide.with(this).load(url).into(imageView);
+                Glide.with(this).load(list.get(index)).into(imageView);
 
                 linearLayout.addView(imageView);
-            }
 
-        ((TextView) findViewById(R.id.Title_textView)).setText(bundle.getString("title"));
-        ((QMUISpanTouchFixTextView) findViewById(R.id.Contet_textView)).setText(bundle.getString("content"));
+            }
+        }
+        else {
+            QMUISpanTouchFixTextView textView = new QMUISpanTouchFixTextView(this);
+            textView.setText(text);
+            textView.setEms(10);
+            textView.setTextSize(20);
+            linearLayout.addView(textView);
+        }
+
+        ((TextView)
+
+                findViewById(R.id.Title_textView)).
+
+                setText(bundle.getString("title"));
+
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+
+        final String finalText = "标题: " + bundle.getString("title") + "\n\n" + text;
+
+
+
+        share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                //shareUtil.shareImg();
+                //shareUtil.shareText("com.tencent.mm", null, finalText, bundle.getString("title"), "分享新闻");
+                //shareUtil.shareText("com.tencent.mm", "com.tencent.mm.ui.tools.ShareImgUI", "https://www.aiipu.com/", "分享标题", "分享主题");
+                shareUtil.shareText("com.tencent.mobileqq", null, finalText, bundle.getString("title"), "分享新闻");
+                //shareUtil.shareImg("com.tencent.mm", "com.tencent.mm.ui.tools.ShareImgUI", uri);
+
+            }
+        });
+
+
+
+
+
+
+
+
+
+
 
 
     }
@@ -129,6 +197,20 @@ public class NewsDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+//    public void share() {
+//
+//    }
+//
+//
+//    public void shareQQ() {
+//        shareUtil.shareText("com.tencent.mobileqq", null, "这是一条分享信息",
+//                "分享标题", "分享主题");
+//    }
+//
+//    public void shareWX() {
+//        shareUtil.shareText("com.tencent.mm", null, "这是一条分享信息", "分享标题",
+//                "分享主题");
+//    }
     public void shareText() {
 
     }
@@ -138,4 +220,10 @@ public class NewsDetailActivity extends AppCompatActivity {
         super.onBackPressed();
         Animatoo.animateSlideRight(this);
     }
+
+
+    public void share(Uri uri) {
+        shareAnyWhere.shareQQ(this, shareAnyWhere.createUriList(uri), "日你先人");
+    }
+
 }

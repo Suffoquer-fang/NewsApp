@@ -38,8 +38,9 @@ public class MyCursorAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         final TextView tv = view.findViewById(R.id.content);
         final ImageView iv = view.findViewById(R.id.close);
+
         tv.setText(cursor.getString(cursor.getColumnIndex("Content")));
-        tv.setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.content_lay).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 listener.onClick(view);

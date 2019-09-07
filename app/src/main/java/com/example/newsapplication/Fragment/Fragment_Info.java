@@ -1,20 +1,25 @@
 package com.example.newsapplication.Fragment;
 
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageButton;
+import android.view.WindowManager;
+import android.widget.CompoundButton;
+import android.widget.Switch;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.example.newsapplication.Activity.FavoriteActivity;
 import com.example.newsapplication.Activity.HistoryActivity;
-import com.example.newsapplication.Activity.SettingsActivity;
+import com.example.newsapplication.Activity.MainActivity;
 import com.example.newsapplication.R;
+import com.example.newsapplication.helper.GetNewsHelper;
 
 public class Fragment_Info extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -37,7 +42,7 @@ public class Fragment_Info extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment Fragment_Info.
+     * @return a new instance of fragment Fragment_Info.
      */
     // TODO: Rename and change types and number of parameters
     public static Fragment_Info newInstance(String param1, String param2) {
@@ -65,13 +70,15 @@ public class Fragment_Info extends Fragment {
         View view = inflater.inflate(R.layout.fragment_fragment__info, container, false);
 
 
-        ImageButton favBtn = view.findViewById(R.id.favBtn);
-        ImageButton hisBtn = view.findViewById(R.id.historyBtn);
+        TextView favBtn = view.findViewById(R.id.textView3);
+        TextView hisBtn = view.findViewById(R.id.textView5);
 
         favBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(getActivity(), FavoriteActivity.class));
+
+                Animatoo.animateSlideLeft(getContext());
             }
         });
 
@@ -80,23 +87,41 @@ public class Fragment_Info extends Fragment {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(getActivity(), HistoryActivity.class));
+                Animatoo.animateSlideLeft(getContext());
             }
         });
 
-        Button btn = view.findViewById(R.id.button);
-        btn.setText("设置");
-        btn.setOnClickListener(new View.OnClickListener() {
+
+        Switch swich = view.findViewById(R.id.switch1);
+        swich.setChecked(false);
+
+        swich.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                ((MainActivity) getActivity()).setOnline(!b);
+
+
+            }
+        });
+
+        Switch swich2 = view.findViewById(R.id.switch2);
+        swich2.setChecked(false);
+
+        swich2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                setLight(getActivity(), b ? 5: 100);
+
+            }
+        });
+
+        TextView qk = view.findViewById(R.id.textView10);
+        qk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
-                //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-
+                new GetNewsHelper(view.getContext()).clear();
             }
         });
-
-
-
-
 
 
         return view;
@@ -105,6 +130,14 @@ public class Fragment_Info extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+
+    }
+
+
+    private void setLight(Activity context, int brightness) {
+        WindowManager.LayoutParams lp = context.getWindow().getAttributes();
+        lp.screenBrightness = Float.valueOf(brightness) * (1f / 255f);
+        context.getWindow().setAttributes(lp);
 
     }
 }

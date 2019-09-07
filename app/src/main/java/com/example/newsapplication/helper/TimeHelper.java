@@ -15,6 +15,8 @@ public class TimeHelper {
     public static String timeBefore(String now, int t)
     {
         Date date = null;
+        if(now == null || now.equals(""))
+            return ft.format(new Date());
         try {
             date = ft.parse(now);
         } catch (ParseException e) {
@@ -28,6 +30,8 @@ public class TimeHelper {
     public static String timeAfter(String now, int t)
     {
         Date date = null;
+        if(now == null || now.equals(""))
+            return ft.format(new Date());
         try {
             date = ft.parse(now);
         } catch (ParseException e) {

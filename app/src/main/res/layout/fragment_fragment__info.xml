@@ -9,45 +9,124 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="720dp"
+        android:divider="@color/black"
+        android:dividerPadding="@dimen/dp_10"
+        android:orientation="vertical"
+        android:showDividers="middle|beginning|end">
 
-        <ImageButton
-            android:id="@+id/imageButton"
+        <TextView
+            android:id="@+id/textView6"
             android:layout_width="match_parent"
-            android:layout_height="189dp"
-            tools:src="@tools:sample/avatars[0]" />
+            android:layout_height="60dp"
+            android:layout_weight="0"
+            android:background="@color/red2"
+            android:gravity="center_vertical"
+            android:text="JARSA NEWS"
+            android:textAlignment="textStart"
+            android:textColor="@color/bg_focus"
+            android:textSize="30sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="86dp"
+            android:layout_height="184dp"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/historyBtn"
+            <ImageView
+                android:id="@+id/imageView2"
                 android:layout_width="match_parent"
-                android:layout_height="86dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="start"
                 android:layout_weight="1"
-                android:src="@android:drawable/presence_away" />
+                android:padding="@dimen/dp_40"
+                android:scaleType="fitXY"
+                android:src="@mipmap/ic_launcher_round" />
 
-            <ImageButton
-                android:id="@+id/favBtn"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="86dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:src="@android:drawable/star_big_on" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="bottom|start"
+                    android:text="JARSA"
+                    android:textSize="36sp" />
+
+                <TextView
+                    android:id="@+id/textView7"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:text="Just A Rather Stupid App"
+                    android:textColor="@color/black" />
+            </LinearLayout>
+
         </LinearLayout>
 
-        <Button
-            android:id="@+id/button"
+        <Space
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Button" />
+            android:layout_height="20dp" />
 
-        <Button
-            android:id="@+id/button2"
+        <TextView
+            android:id="@+id/textView3"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Button" />
+            android:layout_height="51dp"
+            android:gravity="center_vertical"
+            android:paddingStart="@dimen/dp_10"
+            android:text="收藏"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:background="@drawable/item_selector"/>
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="match_parent"
+            android:layout_height="51dp"
+            android:gravity="center_vertical"
+            android:paddingStart="@dimen/dp_10"
+            android:text="浏览历史"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:background="@drawable/item_selector"/>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="13dp" />
+
+        <Switch
+            android:id="@+id/switch1"
+            android:layout_width="match_parent"
+            android:layout_height="51dp"
+            android:paddingStart="@dimen/dp_10"
+            android:text="离线模式"
+            android:textSize="18sp" />
+
+        <Switch
+            android:id="@+id/switch2"
+            android:layout_width="match_parent"
+            android:layout_height="51dp"
+            android:paddingStart="@dimen/dp_10"
+            android:text="夜间模式"
+            android:textSize="18sp" />
+
+
+        <TextView
+            android:id="@+id/textView10"
+            android:layout_width="match_parent"
+            android:layout_height="51dp"
+            android:gravity="center_vertical"
+            android:paddingStart="@dimen/dp_10"
+            android:text="清空偏好数据"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:background="@drawable/item_selector"/>
     </LinearLayout>
 </FrameLayout>

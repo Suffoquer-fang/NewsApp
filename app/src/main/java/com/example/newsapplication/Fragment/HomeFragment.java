@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.example.newsapplication.Activity.ChannelActivity;
 import com.example.newsapplication.Activity.SearchActivity;
 import com.example.newsapplication.Adapter.DynamicFragmentPagerAdapter;
@@ -128,7 +129,6 @@ public class HomeFragment extends BaseLazyLoadFragment
         for(String title : titles)
         {
             categoryList.add(NewsListFragment.newInstance(title, ""));
-
         }
         //TODO
     }
@@ -206,7 +206,7 @@ public class HomeFragment extends BaseLazyLoadFragment
 
         intent.putExtras(bundle);
         startActivityForResult(intent, 10008);
-
+        Animatoo.animateSlideUp(getContext());
 
     }
 
@@ -221,15 +221,24 @@ public class HomeFragment extends BaseLazyLoadFragment
             System.out.println("getData");
             ArrayList<String> rtnChannels = data.getStringArrayListExtra("rtnChannels");
             if(rtnChannels == null) return;
+
+
+
             titles = new String[rtnChannels.size()];
             for(int i = 0; i < titles.length; ++i) {
                 titles[i] = rtnChannels.get(i);
-                System.out.println(titles[i]);
+
             }
+
+
 
             alltitles.clear();
             alltitles.addAll(rtnChannels);
+
+
             adapter.notifyDataSetChanged();
+
+
 
 
         }
@@ -240,5 +249,8 @@ public class HomeFragment extends BaseLazyLoadFragment
         //new HisFragment().show(getChildFragmentManager(), "www");
         startActivity(new Intent(getActivity(), SearchActivity.class));
 
+        Animatoo.animateSlideLeft(getContext());
     }
+
+
 }

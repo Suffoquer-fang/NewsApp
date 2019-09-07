@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -48,6 +47,8 @@ public class FavoriteActivity extends AppCompatActivity
 
     boolean isLoading = false;
 
+    int retryTime = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +58,7 @@ public class FavoriteActivity extends AppCompatActivity
         slidr = new Slidr();
         slidr.attach(this);
 
-
+        setTitle("JARSA NEWS 新闻收藏");
         initView();
     }
 
@@ -152,6 +153,8 @@ public class FavoriteActivity extends AppCompatActivity
 
     public void requestNewsData()
     {
+        retryTime += 1;
+        if(retryTime > 5) return;
         getNewsHelper.requestFavorite(10, false);
         new Thread(new Runnable() {
             @Override
@@ -200,6 +203,7 @@ public class FavoriteActivity extends AppCompatActivity
                     bgaRefreshLayout.endRefreshing();
                     stateView.showContent();
                     isLoading = false;
+                    retryTime = 0;
                 }
             }, 500);
         }
@@ -212,6 +216,8 @@ public class FavoriteActivity extends AppCompatActivity
                     adapter.notifyDataSetChanged();
                     bgaRefreshLayout.endLoadingMore();
                     stateView.showContent();
+                    retryTime = 0;
+                    isLoading = false;
                 }
             }, 500);
         }
@@ -235,12 +241,13 @@ public class FavoriteActivity extends AppCompatActivity
 
     public void clickItem(int position)
     {
-
-        Toast.makeText(this, newsItemList.get(position).getmTitle(), Toast.LENGTH_SHORT).show();
         String title = newsItemList.get(position).getmTitle();
         String content = newsItemList.get(position).getmContent();
         List<String> imgs= newsItemList.get(position).getmImages();
         ArrayList<String> arrimgs = new ArrayList<>();
+
+        String newsID = newsItemList.get(position).getmNewsID();
+
         if (imgs == null)
             arrimgs = null;
         else
@@ -253,8 +260,13 @@ public class FavoriteActivity extends AppCompatActivity
         bundle.putString("title", title);
         bundle.putString("content", content);
         bundle.putStringArrayList("imgs", arrimgs);
+        bundle.putString("ID", newsID);
         intent.putExtras(bundle);
         startActivity(intent);
+
+
+
+        Animatoo.animateSlideLeft(this);
     }
 
 

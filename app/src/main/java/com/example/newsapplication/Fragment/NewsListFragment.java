@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.blogspot.atifsoftwares.animatoolib.Animatoo;
+import com.example.newsapplication.Activity.MainActivity;
 import com.example.newsapplication.Activity.NewsDetailActivity;
 import com.example.newsapplication.Adapter.NewsItemRecyclerViewAdapter;
 import com.example.newsapplication.R;
@@ -73,6 +74,9 @@ public class NewsListFragment extends BaseLazyLoadFragment
     private String currFirstTime = "";
     private String currLastTime = "";
 
+    private boolean contentOff = false;
+
+    public boolean renew = false;
 
 
     public NewsListFragment() {
@@ -92,6 +96,7 @@ public class NewsListFragment extends BaseLazyLoadFragment
         args.putString(ARG_CATEGORY, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
+        fragment.isLazyLoaded = false;
         return fragment;
     }
 
@@ -107,6 +112,12 @@ public class NewsListFragment extends BaseLazyLoadFragment
 
     public String getArgCategory() {return mCategory;}
 
+    public boolean isOnline()
+    {
+        return ((MainActivity)getActivity()).getIsOnline();
+    }
+
+
     @Override
     public boolean onLazyLoad() {
         Log.d(TAG, "lazy update begin! " + mCategory);
@@ -121,6 +132,7 @@ public class NewsListFragment extends BaseLazyLoadFragment
     @Override
     public void onResume() {
         super.onResume();
+
         Toast.makeText(getContext(), mCategory, Toast.LENGTH_SHORT);
     }
 
@@ -196,6 +208,8 @@ public class NewsListFragment extends BaseLazyLoadFragment
 
     }
 
+
+
     private void getPositionAndOffset()
     {
         LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
@@ -219,15 +233,23 @@ public class NewsListFragment extends BaseLazyLoadFragment
         itemClickListener = new NewsItemRecyclerViewAdapter.ItemClickListener() {
             @Override
             public void onItemClick(int position, boolean isDel) {
-
+                if(isDel)
+                {
+                    newsItemList.remove(position);
+                    adapter.notifyItemRemoved(position);
+                    adapter.notifyItemRangeChanged(position, newsItemList.size() - position);//通知重新绑定某一范围内的的数据与界面
+                    return;
+                }
                 getNewsHelper.addHistory(newsItemList.get(position));
                 adapter.notifyItemChanged(position);
 
-                Toast.makeText(getContext(), newsItemList.get(position).getmTitle(), Toast.LENGTH_SHORT).show();
                 String title = newsItemList.get(position).getmTitle();
                 String content = newsItemList.get(position).getmContent();
                 List<String> imgs= newsItemList.get(position).getmImages();
                 ArrayList<String> arrimgs = new ArrayList<>();
+
+                String newsID = newsItemList.get(position).getmNewsID();
+
                 if (imgs == null)
                     arrimgs = null;
                 else
@@ -240,8 +262,11 @@ public class NewsListFragment extends BaseLazyLoadFragment
                 bundle.putString("title", title);
                 bundle.putString("content", content);
                 bundle.putStringArrayList("imgs", arrimgs);
+                bundle.putString("ID", newsID);
                 intent.putExtras(bundle);
                 startActivity(intent);
+
+
 
                 Animatoo.animateSlideLeft(getContext());
             }
@@ -256,7 +281,31 @@ public class NewsListFragment extends BaseLazyLoadFragment
 
     public void requestNewsData()
     {
-        getNewsHelper.getNewsFromPureNetwork(mCategory, currFirstTime, TimeHelper.getCurrentTime(), "", this, false);
+        if(isOnline())
+        {
+            if(contentOff)
+            {
+                currFirstTime = "";
+                currLastTime = "";
+                newsItemList.clear();
+            }
+            getNewsHelper.getNewsFromPureNetwork(mCategory, currFirstTime, TimeHelper.getCurrentTime(), "", this, false);
+            contentOff = false;
+        }
+        else if(!contentOff){
+            getNewsHelper.getNewsOffline(300, mCategory, this);
+            contentOff = true;
+        }
+        else
+        {
+            recyclerView.post(new Runnable() {
+                @Override
+                public void run() {
+                    bgaRefreshLayout.endRefreshing();
+                    Toasty.info(recyclerView.getContext(), "暂无更新缓存数据", Toasty.LENGTH_SHORT, true).show();
+                }
+            });
+        }
     }
 
 
@@ -268,6 +317,8 @@ public class NewsListFragment extends BaseLazyLoadFragment
 
     @Override
     public boolean onBGARefreshLayoutBeginLoadingMore(BGARefreshLayout refreshLayout) {
+        if(!isOnline())
+            return false;
         getNewsHelper.getNewsFromPureNetwork(mCategory, "", currLastTime, "", this, true);
         return true;
     }
@@ -281,18 +332,33 @@ public class NewsListFragment extends BaseLazyLoadFragment
 
     @Override
     public void onGetNewsSuccessful(List<NewsItem> newsList, boolean loadmore) {
+        isLazyLoaded = true;
         if(!loadmore) {
 
-            newsItemList.addAll(0, newsList);
+            int tmp = newsList.size();
 
-            final int addSize = newsList.size();
+            if(mCategory.equals("推荐"))
+            {
+                for(NewsItem item : newsList)
+                    if(!newsItemList.contains(item))
+                        newsItemList.add(0, item);
+                    else
+                        tmp--;
+            }
+            else
+                newsItemList.addAll(0, newsList);
 
+
+            final int addSize = tmp;
             if(newsItemList.size() > 0) {
                 currFirstTime = newsItemList.get(0).getmPubTime();
                 currFirstTime = TimeHelper.timeAfter(currFirstTime, 1);
                 currLastTime = newsItemList.get(newsItemList.size()-1).getmPubTime();
                 currLastTime = TimeHelper.timeBefore(currLastTime, 1);
+
             }
+
+
 
             recyclerView.postDelayed(new Runnable() {
                 @Override
@@ -328,15 +394,19 @@ public class NewsListFragment extends BaseLazyLoadFragment
     }
 
     @Override
-    public void onGetNewsFailed(int failed_id) {
+    public void onGetNewsFailed(final int failed_id) {
         System.out.println("fail:" + failed_id);
+        isLazyLoaded = false;
         recyclerView.postDelayed(new Runnable() {
             @Override
             public void run() {
                 stateView.showContent();
                 bgaRefreshLayout.endLoadingMore();
                 bgaRefreshLayout.endRefreshing();
-                Toasty.error(getContext(), "刷新失败", Toasty.LENGTH_SHORT, true).show();
+                if(failed_id == 2)
+                    Toasty.info(recyclerView.getContext(), "暂无推荐", Toasty.LENGTH_SHORT, true).show();
+                else
+                    Toasty.error(getContext(), "刷新失败", Toasty.LENGTH_SHORT, true).show();
 
             }
         }, 1000);

@@ -12,9 +12,9 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.example.newsapplication.Adapter.MyCursorAdapter;
 import com.example.newsapplication.R;
 import com.example.newsapplication.helper.MyDBOpenHelper;
@@ -40,13 +40,9 @@ public class SearchActivity extends AppCompatActivity {
 
         slidr = new Slidr();
         slidr.attach(this);
-        helper = new MyDBOpenHelper(this, "TEST1.db", null, 1);
+        helper = MyDBOpenHelper.getInstance(this, "TEST1.db", null, 1);
 
-        ActionBar actionBar = getSupportActionBar();
-        if(actionBar != null){
-            actionBar.setHomeButtonEnabled(true);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        getSupportActionBar().hide();
         if (savedInstanceState == null) {
             initView();
         }
@@ -65,7 +61,8 @@ public class SearchActivity extends AppCompatActivity {
         mAdapter = new MyCursorAdapter(this, c, helper, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String tmp = ((TextView)view).getText().toString();
+                String tmp = ((TextView)view.findViewById(R.id.content)).getText().toString();
+
                 sv.setQuery(tmp, true);
             }
         });
@@ -89,7 +86,7 @@ public class SearchActivity extends AppCompatActivity {
                     case MotionEvent.ACTION_UP: {
 
                         Cancel.setTextColor(getApplicationContext().getResources().getColor(R.color.DeepBlue));
-                        finish();
+                        onBackPressed();
                         break;
                     }
                 }
@@ -155,8 +152,8 @@ public class SearchActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        finish();
         super.onBackPressed();
+        Animatoo.animateSlideRight(this);
 
     }
 }

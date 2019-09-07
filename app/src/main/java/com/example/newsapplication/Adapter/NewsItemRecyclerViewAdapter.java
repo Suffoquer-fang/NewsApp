@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,14 +13,26 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.newsapplication.R;
 import com.example.newsapplication.dummy.NewsItem;
+import com.example.newsapplication.helper.GetNewsHelper;
+import com.liyi.highlight.HighlightTextView;
 import com.mcxtzhang.swipemenulib.SwipeMenuLayout;
+import com.zyyoona7.popup.EasyPopup;
 
 import java.util.List;
+
+import fm.jiecao.jcvideoplayer_lib.JCVideoPlayerStandard;
+
 
 public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRecyclerViewAdapter.ViewHolder> {
 
     private final List<NewsItem> mNewsList;
     private final ItemClickListener mListener;
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
+
+    private String keyword = "";
 
     public boolean isSwipe() {
         return isSwipe;
@@ -59,6 +72,9 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
             case 2:
                 return new MultiPhotosViewHolder(LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.item_type_2, parent, false));
+            case 3:
+                return new VideoViewHolder(LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_type_3, parent, false));
         }
 
         return null;
@@ -75,6 +91,7 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
 
         if(isSwipe)
         {
+            holder.mView.findViewById(R.id.close_btn).setVisibility(View.INVISIBLE);
             holder.mView.findViewById(R.id.btnDelete).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -83,16 +100,30 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
             });
         }
 
-        holder.mView.findViewById(R.id.content_fav).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onItemClick(position, false);
+        if(holder.mItem.getmType() != 3) {
+            holder.mView.findViewById(R.id.content_fav).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (null != mListener) {
+                        // Notify the active callbacks interface (the activity, if the
+                        // fragment is attached to one) that an item has been selected.
+                        mListener.onItemClick(position, false);
+                    }
                 }
-            }
-        });
+            });
+        }
+
+        if(holder.mItem.getmType() != 3) {
+            holder.mView.findViewById(R.id.close_btn).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    clickCloseBtn(view, position, holder.mItem);
+
+                }
+            });
+        }
+
+
     }
 
     @Override
@@ -101,10 +132,24 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
     }
 
 
+    public void setTitle(HighlightTextView view, String title, boolean isInHis)
+    {
+
+        view.setText(title);
+        int normalColor = (!isInHis || isSwipe) ? view.getResources().getColor(R.color.black) :view.getResources().getColor(R.color.gray);
+        view.setTextColor(normalColor);
+//        if(!keyword.equals(""))
+//        {
+//            view.addContent(title).addFontColorStyle(normalColor, 0, title.length()).addFontColorStyleByKey(view.getResources().getColor(R.color.red_500), keyword).build();
+//        }
+//        else
+//            view.addContent(title).addFontColorStyle(normalColor, 0, title.length()).build();
+
+    }
 
     abstract class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView mTitleView;
+        public final HighlightTextView mTitleView;
         public final TextView mPubTimeView;
         public final TextView mAuthorView;
 
@@ -114,7 +159,7 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
             super(view);
             mView = view;
 
-            mTitleView = (TextView)view.findViewById(R.id.title);
+            mTitleView = (HighlightTextView) view.findViewById(R.id.title);
             mPubTimeView = (TextView)view.findViewById(R.id.pubtime);
             mAuthorView = (TextView)view.findViewById(R.id.author);
 
@@ -129,15 +174,10 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
         @SuppressLint("ResourceAsColor")
         public void updateView() {
             mAuthorView.setText(mItem.getmAuthor());
-            mTitleView.setText(mItem.getmTitle());
+
             mPubTimeView.setText(mItem.getmPubTime());
 
-
-            if(!mItem.isInHistory() || isSwipe)
-                mTitleView.setTextColor(mView.getResources().getColor(R.color.black));
-            else
-                mTitleView.setTextColor(mView.getResources().getColor(R.color.gray));
-
+            setTitle(mTitleView, mItem.getmTitle(), mItem.isInHistory());
         }
     }
 
@@ -153,13 +193,9 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
         public void updateView()
         {
 
-            if(!mItem.isInHistory() || isSwipe)
-                mTitleView.setTextColor(mView.getResources().getColor(R.color.black));
-            else
-                mTitleView.setTextColor(mView.getResources().getColor(R.color.gray));
+            setTitle(mTitleView, mItem.getmTitle(), mItem.isInHistory());
 
             mAuthorView.setText(mItem.getmAuthor());
-            mTitleView.setText(mItem.getmTitle());
             mPubTimeView.setText(mItem.getmPubTime());
             mImgView.setImageResource(R.drawable.ic_menu_camera); //TODO
             Glide.with(mView).load(mItem.getmImages().get(0)).into(mImgView);
@@ -179,13 +215,8 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
         @SuppressLint("ResourceAsColor")
         public void updateView()
         {
-            if(!mItem.isInHistory() || isSwipe)
-                mTitleView.setTextColor(mView.getResources().getColor(R.color.black));
-            else
-                mTitleView.setTextColor(mView.getResources().getColor(R.color.gray));
 
-
-            mTitleView.setText(mItem.getmTitle());
+            setTitle(mTitleView, mItem.getmTitle(), mItem.isInHistory());
             mPubTimeView.setText(mItem.getmPubTime());
             mAuthorView.setText(mItem.getmAuthor());
             mImgView_2.setImageResource(R.drawable.ic_menu_camera);
@@ -199,7 +230,60 @@ public class NewsItemRecyclerViewAdapter extends RecyclerView.Adapter<NewsItemRe
     }
 
 
+    public class VideoViewHolder extends ViewHolder
+    {
+        public JCVideoPlayerStandard jcVideoPlayerStandard;
+        public VideoViewHolder(View view) {super(view); jcVideoPlayerStandard = view.findViewById(R.id.videoplayer);}
+        @SuppressLint("ResourceAsColor")
+        public void updateView() {
+            mAuthorView.setText(mItem.getmAuthor());
+
+            mPubTimeView.setText(mItem.getmPubTime());
+
+            setTitle(mTitleView, mItem.getmTitle(), mItem.isInHistory());
+
+            jcVideoPlayerStandard.setUp(mItem.getmVideo()
+                    ,JCVideoPlayerStandard.SCREEN_LAYOUT_NORMAL, "Video Clip");
+        }
+    }
 
 
+
+    public void clickCloseBtn(View v, final int pos, NewsItem item)
+    {
+        final EasyPopup popup = EasyPopup.create().setContentView(v.getContext(), R.layout.popup)
+                .setAnimationStyle(R.style.QMUI_Animation)
+                .setFocusAndOutsideEnable(true)
+                .apply();
+
+        LinearLayout ll = popup.findViewById(R.id.ll);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        layoutParams.setMargins(10, 10, 10, 10);
+
+        List<String> tmp = item.getmKeywords();
+
+        for (String i : tmp) {
+            TextView tv = new TextView(v.getContext());
+            tv.setLayoutParams(layoutParams);
+            tv.setBackground(v.getResources().getDrawable(R.drawable.textview_border));
+            tv.setText(i);
+            tv.setTextSize(20);
+            ll.addView(tv);
+            tv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String key = ((TextView)view).getText().toString();
+                    new GetNewsHelper(view.getContext()).addNewKeyword(key);
+                    popup.dismiss();
+                    mListener.onItemClick(pos, true);
+
+                }
+            });
+        }
+
+        popup.showAsDropDown(v);
+
+
+    }
 
 }

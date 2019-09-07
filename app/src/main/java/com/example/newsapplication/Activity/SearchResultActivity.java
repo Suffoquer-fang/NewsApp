@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.example.newsapplication.Adapter.NewsItemRecyclerViewAdapter;
 import com.example.newsapplication.R;
 import com.example.newsapplication.dummy.NewsItem;
@@ -76,6 +77,8 @@ public class SearchResultActivity extends AppCompatActivity
         slidr = new Slidr();
         slidr.attach(this);
 
+        getSupportActionBar().hide();
+
         Bundle bundle = getIntent().getExtras();
         searchKeyword = bundle.getString("SearchKey");
 
@@ -88,11 +91,12 @@ public class SearchResultActivity extends AppCompatActivity
 
         recyclerView = findViewById(R.id.search_result_recyclerView);
         adapter = new NewsItemRecyclerViewAdapter(newsItemList, itemClickListener);
+
         Cancel = findViewById(R.id.textView);
         searchView = findViewById(R.id.search);
 
         bgaRefreshLayout = findViewById(R.id.BGARefreshLayout);
-        stateView = StateView.wrap(recyclerView);
+        stateView = StateView.wrap(bgaRefreshLayout);
 
         stateView.setLoadingResource(R.layout.centerloading);
         stateView.showLoading();
@@ -142,7 +146,7 @@ public class SearchResultActivity extends AppCompatActivity
                     case MotionEvent.ACTION_UP: {
 
                         Cancel.setTextColor(getApplicationContext().getResources().getColor(R.color.DeepBlue));
-                        finish();
+                        onBackPressed();
                         break;
                     }
                 }
@@ -206,7 +210,16 @@ public class SearchResultActivity extends AppCompatActivity
         itemClickListener = new NewsItemRecyclerViewAdapter.ItemClickListener() {
             @Override
             public void onItemClick(int position, boolean isDel) {
-                clickItem(position);
+                if(isDel)
+                {
+                    newsItemList.remove(position);
+                    adapter.notifyItemRemoved(position);
+                    adapter.notifyItemRangeChanged(position, newsItemList.size() - position);//通知重新绑定某一范围内的的数据与界面
+                }
+                else
+                    clickItem(position);
+
+
             }
         };
     }
@@ -216,6 +229,7 @@ public class SearchResultActivity extends AppCompatActivity
         currFirstTime = "";
         currLastTime = "";
         newsItemList.clear();
+        adapter.setKeyword(searchKeyword);
         adapter.notifyDataSetChanged();
         stateView.showLoading();
         requestNewsData();
@@ -305,11 +319,20 @@ public class SearchResultActivity extends AppCompatActivity
 
     public void clickItem(int position)
     {
-        Toast.makeText(this, newsItemList.get(position).getmTitle(), Toast.LENGTH_SHORT).show();
+        getNewsHelper.addHistory(newsItemList.get(position));
+        adapter.notifyItemChanged(position);
+
         String title = newsItemList.get(position).getmTitle();
         String content = newsItemList.get(position).getmContent();
         List<String> imgs= newsItemList.get(position).getmImages();
         ArrayList<String> arrimgs = new ArrayList<>();
+
+        String newsID = newsItemList.get(position).getmNewsID();
+
+
+        getNewsHelper.addNewKeyword(newsItemList.get(position).getmKeywords().get(0));
+
+
         if (imgs == null)
             arrimgs = null;
         else
@@ -322,8 +345,21 @@ public class SearchResultActivity extends AppCompatActivity
         bundle.putString("title", title);
         bundle.putString("content", content);
         bundle.putStringArrayList("imgs", arrimgs);
+        bundle.putString("ID", newsID);
         intent.putExtras(bundle);
         startActivity(intent);
+
+
+
+        Animatoo.animateSlideLeft(this);
+
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Animatoo.animateSlideRight(this);
     }
 
 }

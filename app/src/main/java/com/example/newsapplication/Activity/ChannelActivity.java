@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.blogspot.atifsoftwares.animatoolib.Animatoo;
 import com.example.newsapplication.Adapter.ChannelAdapter;
 import com.example.newsapplication.R;
 import com.example.newsapplication.dummy.ChannelEntity;
@@ -115,7 +116,8 @@ public class ChannelActivity extends Activity {
         closeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendData();
+                //sendData();
+                onBackPressed();
             }
         });
 
@@ -127,6 +129,8 @@ public class ChannelActivity extends Activity {
         System.out.println("press");
         Toast.makeText(this, "PressBtn", Toast.LENGTH_SHORT);
         sendData();
+        super.onBackPressed();
+        Animatoo.animateSlideDown(this);
     }
 
     public void sendData()
@@ -143,6 +147,6 @@ public class ChannelActivity extends Activity {
 
         intent.putExtras(bundle);
         setResult(10008, intent);
-        finish();
+
     }
 }

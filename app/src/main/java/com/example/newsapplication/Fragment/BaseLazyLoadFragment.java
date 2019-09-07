@@ -36,6 +36,12 @@ public abstract class BaseLazyLoadFragment extends Fragment {
         lazyload();
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        isLazyLoaded = false;
+    }
+
     private void lazyload()
     {
         if(getUserVisibleHint() && isPrepared && !isLazyLoaded)

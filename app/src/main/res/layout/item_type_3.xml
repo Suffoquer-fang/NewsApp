@@ -7,15 +7,14 @@
     android:clickable="true"
     android:paddingBottom="1dp"
     android:id="@+id/swipeMenuLayout"
-    style="@style/MyTheme">
+    style="@style/MyTheme"
+    android:background="@color/background_material_light">
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:id="@+id/content_fav"
-
-    android:background="@drawable/item_selector">
+    android:id="@+id/content_fav">
 
 
     <com.liyi.highlight.HighlightTextView
@@ -26,43 +25,15 @@
         android:paddingLeft="10dp"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
+        android:maxLines="2"
         android:textStyle="bold"
         android:textSize="18sp"
-        android:maxLines="2"
         />
 
-    <LinearLayout
+    <fm.jiecao.jcvideoplayer_lib.JCVideoPlayerStandard
+        android:id="@+id/videoplayer"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:layout_gravity="center_horizontal"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:id="@+id/first_image_type_2"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:scaleType="fitXY"
-            android:layout_weight="1"
-             />
-
-        <ImageView
-            android:id="@+id/second_image_type_2"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:scaleType="fitXY"
-            android:layout_weight="1"
-             />
-
-        <ImageView
-            android:id="@+id/third_image_type_2"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:scaleType="fitXY"
-            android:layout_weight="1"
-             />
-    </LinearLayout>
+        android:layout_height="200dp" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -70,7 +41,6 @@
         android:orientation="horizontal"
         android:paddingLeft="10dp"
         android:layout_marginTop="10dp"
-        android:id="@+id/relative"
         >
         <TextView
             android:id="@+id/pubtime"
@@ -86,12 +56,6 @@
             android:text="新闻集锦"
             android:layout_marginLeft="20dp"
             />
-        <ImageView
-            android:layout_alignParentEnd="true"
-            android:id="@+id/close_btn"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@drawable/icon_close"/>
     </RelativeLayout>
 </LinearLayout>
 

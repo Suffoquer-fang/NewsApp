@@ -6,7 +6,7 @@ android {
     defaultConfig {
         applicationId "com.example.newsapplication"
         minSdkVersion 23
-        targetSdkVersion 28
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -75,4 +75,16 @@ dependencies {
     implementation "org.salient.artvideoplayer:artplayer-x86_64:0.7.0"
     //ExoPlayer2 : optional
     implementation "org.salient.artvideoplayer:artplayer-exo:0.7.0"
+    implementation 'com.github.medyo:fancybuttons:1.9.1'
+    implementation 'com.wx.goodview:goodview:1.0.0'
+    implementation 'com.github.varunest:sparkbutton:1.0.6'
+    implementation 'loic.teillard.colortextview:colortextview:1.0.0'
+    implementation 'com.github.liuguangli:FloatUtil:1.0'
+    implementation 'com.github.albert-lii:HighlightTextView:1.0.0'
+    implementation 'fm.jiecao:jiecaovideoplayer:5.5.2'
+
+    implementation 'com.github.zyyoona7:EasyPopup:1.1.2'
+
+
+
 }

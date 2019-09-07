@@ -10,13 +10,6 @@
     android:background="@color/background_material_light"
     android:orientation="vertical">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_marginBottom="10dp"
-        android:textAlignment="center"
-        android:textSize="18pt"
-        android:text="新闻历史"/>
 
     <cn.bingoogolapple.refreshlayout.BGARefreshLayout
         android:layout_width="match_parent"
@@ -27,7 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/his_recyclerView"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="35dp"
+            android:layout_marginEnd="20dp"
             android:paddingStart="30dp">
 
 
