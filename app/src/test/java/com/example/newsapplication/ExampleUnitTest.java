@@ -1,4 +1,4 @@
-package com.example.newsapplication;
+package com.example.Fangyan;
 
 import org.junit.Test;
 
